@@ -11,7 +11,8 @@ A concise one-paragraph overview of the dataset, tasks, scale, and why it matter
 
 ---
 
-## About {#about .anchor}
+<section id="about" class="anchor"></section>
+## About
 
 - **Tasks**: classification / detection / segmentation / retrieval / VQA …
 - **Scale**: 100k samples, 1.2M annotations, 50+ categories
@@ -22,7 +23,8 @@ Links: [GitHub](https://github.com/yourname/yourrepo) · [Paper](https://arxiv.o
 
 ---
 
-## Dataset {#dataset .anchor}
+<section id="dataset" class="anchor"></section>
+## Dataset
 
 **Download**
 

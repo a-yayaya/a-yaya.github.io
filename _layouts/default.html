@@ -8,8 +8,8 @@
   <link rel="icon" href="{{ '/assets/favicon.png' | relative_url }}">
   {%- seo -%}
 
-  <!-- Tailwind (no build) -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind + Typography 插件（关键！） -->
+  <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
   <script>
     tailwind.config = { darkMode: 'class' };
     const t = localStorage.getItem('theme');
@@ -19,16 +19,14 @@
   </script>
   <style>
     :root { --page-w: 880px; }
-    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; }
     .content { max-width: var(--page-w); }
-    .prose p { line-height:1.7 }
-    .prose pre, .prose code { font-size: 0.95rem }
-    .anchor {scroll-margin-top: 96px}
+    .anchor { scroll-margin-top: 96px; }
   </style>
 </head>
 <body class="bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
 
-  <!-- Top nav (fixed, minimal) -->
+  <!-- 顶部导航（固定、极简） -->
   <header class="sticky top-0 z-50 bg-white/85 dark:bg-slate-950/85 backdrop-blur border-b border-slate-200 dark:border-slate-800">
     <div class="content mx-auto px-4 h-14 flex items-center justify-between">
       <a href="{{ '/' | relative_url }}" class="font-semibold tracking-tight">{{ site.title }}</a>
@@ -42,6 +40,7 @@
     </div>
   </header>
 
+  <!-- 关键：prose 样式容器 -->
   <main class="content mx-auto px-4 py-10 md:py-14 prose prose-slate dark:prose-invert">
     {{ content }}
   </main>
@@ -50,7 +49,7 @@
     © 2025 YOUR LAB / GROUP
   </footer>
 
-  <!-- Dark mode toggle: press "d" -->
+  <!-- 按 "d" 切换深色 -->
   <script>
     document.addEventListener('keydown', e => {
       if (e.key === 'd') {

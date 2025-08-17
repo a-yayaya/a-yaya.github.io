@@ -1,464 +1,414 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Echo-4o Gallery</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Echo-4o-Image — Gallery</title>
+<style>
+  :root{
+    --bg:#0b0f19;        /* 背景(深) */
+    --text:#e6e9ef;      /* 文字 */
+    --muted:#9aa3b2;     /* 次级文字 */
+    --card:#111827;      /* 卡片底色 */
+    --border:#1f2937;    /* 卡片描边 */
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+    --blue:#60a5fa; --pink:#fb72c3; --violet:#a78bfa;
+    --maxw:1200px; --radius:20px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%; background:var(--bg); color:var(--text); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;}
+  a{color:var(--blue); text-decoration:none}
+  a:hover{text-decoration:underline}
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
+  /* ====== 整屏翻页 ====== */
+  .snap-container{
+    height:100vh; overflow-y:auto;
+    scroll-snap-type:y mandatory;     /* 核心：滚动对齐 */
+    scroll-behavior:smooth;
+  }
+  section.snap{
+  height:100vh;
+  scroll-snap-align:start;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  overflow:hidden;           /* ✅ 防止下一屏标题探出 */
+  }
+  .inner{ width:100%; max-width:var(--maxw); padding:24px; }
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:var(--shadow);
+  }
 
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 2rem 0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
+  /* ====== 统计页 ====== */
+  .stats-grid{display:grid; gap:24px; grid-template-columns:repeat(1,minmax(0,1fr));}
+  @media(min-width:900px){ .stats-grid{grid-template-columns:repeat(3,1fr);} }
+  .stat-card{padding:24px}
+  .stat-title{font-weight:800; text-align:center; margin-bottom:12px}
+  .ring{
+    width:min(260px,60vw); height:min(260px,60vw); margin:0 auto; position:relative;
+  }
+  .ring canvas{position:absolute; inset:0}
+  .ring .center{position:absolute; inset:0; display:grid; place-items:center; font-weight:800; font-size:28px}
+  .ring .center small{display:block; color:var(--muted); font-weight:600; font-size:12px; margin-top:4px}
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
+  /* ====== 样例页 ====== */
+  .gallery{display:grid; gap:18px; grid-template-columns:repeat(2,1fr)}
+  @media(min-width:900px){ .gallery{grid-template-columns:repeat(4,1fr)} }
+  .thumb{width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:16px; border:1px solid var(--border); background:#0f172a}
 
-        .header-content {
-            text-align: center;
-        }
+  /* ====== 右侧导航点 ====== */
+  .dots{position:fixed; right:16px; top:50%; transform:translateY(-50%); display:grid; gap:10px; z-index:50}
+  .dot{width:10px;height:10px;border-radius:50%; background:#334155; border:1px solid #64748b; cursor:pointer; transition:.2s}
+  .dot.active{background:#93c5fd; border-color:#93c5fd; box-shadow:0 0 0 4px rgba(147,197,253,.2)}
+  .dot:hover{transform:scale(1.12)}
 
-        .title {
-            font-size: 3rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 0.5rem;
-        }
+  /* 小标题装饰 */
+  .cap{display:flex; align-items:center; gap:10px; margin-bottom:16px}
+  .cap:before{content:""; width:6px; height:24px; border-radius:6px; background:linear-gradient(180deg, var(--pink), var(--violet))}
 
-        .subtitle {
-            font-size: 1.2rem;
-            color: #666;
-            margin-bottom: 1rem;
-        }
+  /* ===== full-bleed 无外框的整屏图片走马灯 ===== */
+  .fullbleed { width:100%; max-width:1200px; margin:0 auto; padding:0 24px; }
+  .section-title {
+    display:flex; align-items:center; gap:10px; margin:8px 0 18px;
+    font-size:28px; font-weight:800;
+  }
+  .section-title::before{
+    content:""; width:8px; height:26px; border-radius:8px;
+    background:linear-gradient(180deg,#fb72c3,#a78bfa);
+  }
 
-        .description {
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.6;
-            color: #555;
-        }
+  /* 轨道容器（无边框、整屏） */
+  .ticker { position:relative; overflow:hidden; }
+  .ticker:hover .track{ animation-play-state: paused; }
+  .ticker .track{
+    display:flex; align-items:center; gap:22px;
+    will-change: transform;
+    animation: marquee var(--dur,40s) linear infinite;
+  }
+  .ticker[data-dir="ltr"] .track{ animation-direction: reverse; } /* 从左到右 */
+  .ticker[data-dir="rtl"] .track{ animation-direction: normal; }  /* 从右到左 */
 
-        .links {
-            margin-top: 1.5rem;
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
+  @keyframes marquee{
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }   /* 内容 A+B，移动 50% 即无缝 */
+  }
 
-        .link-btn {
-            padding: 0.7rem 1.5rem;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            text-decoration: none;
-            border-radius: 25px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            font-weight: 500;
-        }
+  /* 单图磁贴：尺寸/垂直漂移用 CSS 变量控制 */
+  .tile{
+    border-radius:16px; border:1px solid var(--border);
+    background:#0f172a; overflow:hidden;
+    height: clamp(140px, 24vh, 260px);
+    width:  clamp(140px, 24vh, 260px);
+    transform: translateY(var(--y,0));      /* 垂直错位 */
+  }
+  .tile img{ width:100%; height:100%; object-fit:cover; display:block; }
 
-        .link-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
+  /* —— Multi-Reference 组：四格一起滑动 —— */
+  .bundle{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
+    border:1px solid var(--border); border-radius:16px; padding:8px;
+    background:#0f172a;
+    width: clamp(520px, 66vw, 820px);      /* 组宽度随屏幕变化 */
+    height: clamp(140px, 24vh, 260px);     /* 保持与 tile 高度一致 */
+  }
+  .badge{
+    position:absolute; left:8px; top:8px;
+    font-size:12px; color:#e6e9ef; background:#111827; border:1px solid var(--border);
+    padding:2px 6px; border-radius:999px;
+  }
+  .bundle .cell{
+    position:relative; border-radius:12px; overflow:hidden; border:1px solid var(--border);
+  }
+  .bundle img{ width:100%; height:100%; object-fit:cover; display:block; }
 
-        .main-content {
-            padding: 3rem 0;
-        }
+  /* 行距与自适应 */
+  .row-gap { margin-top: 16px; }
+  /* Lightbox */
+  .lb{
+    position:fixed; inset:0; background:rgba(0,0,0,.75);
+    display:none; align-items:center; justify-content:center;
+    z-index:100; padding:24px;
+  }
+  .lb.open{ display:flex; }
+  .lb img{
+    max-width:min(92vw,1400px);
+    max-height:86vh;
+    border-radius:16px; border:1px solid var(--border); background:#0f172a;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+  }
+  .lb-close{
+    position:fixed; top:16px; right:20px; font-size:28px; line-height:1;
+    color:#e6e9ef; cursor:pointer; user-select:none;
+    background:rgba(17,24,39,.6); border:1px solid var(--border);
+    padding:6px 12px; border-radius:12px;
+  }
+  .tile img, .bundle img{ cursor:zoom-in; }
+/* ===== HERO LANDING (full-screen background) ===== */
+.hero-landing{
+  height:100vh;
+  display:flex; align-items:center; justify-content:center;
+  text-align:center; position:relative;
+  background: url('assets/hero-bg.jpg') no-repeat center/cover;
+}
+.hero-landing::before{
+  content:""; position:absolute; inset:0; background:rgba(0,0,0,.55);
+}
+.hero-content{ position:relative; z-index:1; color:#fff; }
+.hero-content h1{ font-size:clamp(36px,6vw,72px); line-height:1.05; font-weight:900; letter-spacing:.3px; }
+.hero-content p{ margin-top:12px; font-size:clamp(16px,2.2vw,22px); color:#cbd5e1; }
+.hero-buttons{ margin-top:20px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+.hero-buttons .btn{
+  display:inline-flex; align-items:center; gap:8px; padding:10px 16px;
+  border:1px solid var(--border); border-radius:999px;
+  background:#0f172a; color:#fff; text-decoration:none;
+}
+.hero-buttons .btn:hover{ background:#111827; }
 
-        .section {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            margin-bottom: 2rem;
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
 
-        .section-title {
-            font-size: 1.8rem;
-            color: #333;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
-        .gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-
-        .gallery-item {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .gallery-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .image-placeholder {
-            width: 100%;
-            height: 250px;
-            background: linear-gradient(45deg, #f0f2f5, #e1e7ed);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #888;
-            font-style: italic;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .image-placeholder::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-            animation: shimmer 2s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
-        .item-content {
-            padding: 1.5rem;
-        }
-
-        .item-title {
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            color: #333;
-        }
-
-        .item-description {
-            color: #666;
-            line-height: 1.5;
-            font-size: 0.9rem;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .stat-label {
-            color: #666;
-            margin-top: 0.5rem;
-        }
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .feature-icon {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .feature-title {
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            color: #333;
-        }
-
-        .footer {
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            text-align: center;
-            padding: 2rem 0;
-            margin-top: 3rem;
-        }
-
-        @media (max-width: 768px) {
-            .title {
-                font-size: 2rem;
-            }
-            
-            .links {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .gallery {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+</style>
 </head>
+
+
 <body>
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <h1 class="title">Echo-4o</h1>
-                <p class="subtitle">Harnessing the Power of GPT-4o Synthetic Images for Improved Image Generation</p>
-                <p class="description">
-                    Explore our comprehensive dataset of ~180K synthetic samples generated using GPT-4o, featuring surreal fantasy scenarios, 
-                    multi-reference image generation, and complex instruction-following tasks for advanced AI image generation.
-                </p>
-                <div class="links">
-                    <a href="https://arxiv.org/abs/2508.09987" class="link-btn">📄 Paper</a>
-                    <a href="https://huggingface.co/datasets/Yejy53/Echo-4o-Image" class="link-btn">🤗 Dataset</a>
-                    <a href="https://huggingface.co/Yejy53/Echo-4o" class="link-btn">🤖 Model</a>
-                    <a href="https://github.com/yejy53/Echo-4o" class="link-btn">💻 Code</a>
-                </div>
-            </div>
+
+<!-- Lightbox -->
+<div class="lb" id="lb" aria-hidden="true">
+  <img id="lb-img" alt="">
+  <div class="lb-close" id="lb-close">×</div>
+</div>
+<div class="snap-container" id="snapper">
+  <!-- Hero Section -->
+  <section class="snap hero-landing" id="home">
+    <div class="hero-content">
+      <img src="assets/logo.png" class="hero-logo" alt="logo">
+      <h1>Boxuan Dataset Tamplet</h1>
+      <p>Dataset Gallery of <span>Boxuan Data</span></p>
+      <div class="hero-buttons">
+        <a href="#stats" class="btn">● Explore</a>
+        <a href="paper.pdf" class="btn">📄 Paper</a>
+        <a href="https://github.com/xxx" class="btn">💻 Code</a>
+        <a href="dataset.zip" class="btn">📂 Dataset</a>
+      </div>
+    </div>
+  </section>
+  <!-- Page 2: STATS -->
+  <section class="snap" id="stats">
+    <div class="inner">
+      <div class="card" style="padding:26px">
+        <div class="cap"><h2>Data Statistics</h2></div>
+        <div class="stats-grid">
+          <div class="card stat-card">
+            <div class="stat-title" style="color:#fb72c3">Imagination</div>
+            <div class="ring" data-color="#fb72c3" data-track="#3b3b44" data-value="37541" data-total="180000"></div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-title" style="color:#5fb0ff">Multi-Reference</div>
+            <div class="ring" data-color="#5fb0ff" data-track="#3b3b44" data-value="72729" data-total="180000"></div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-title" style="color:#a78bfa">Instruction Following</div>
+            <div class="ring" data-color="#a78bfa" data-track="#3b3b44" data-value="67958" data-total="180000"></div>
+          </div>
         </div>
-    </header>
+      </div>
+    </div>
+  </section>
 
-    <main class="main-content">
-        <div class="container">
-            <!-- Dataset Statistics -->
-            <section class="section">
-                <h2 class="section-title">Dataset Overview</h2>
-                <div class="stats">
-                    <div class="stat-card">
-                        <div class="stat-number">~180K</div>
-                        <div class="stat-label">Total Samples</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">38K</div>
-                        <div class="stat-label">Surreal Fantasy</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">73K</div>
-                        <div class="stat-label">Multi-Reference</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">68K</div>
-                        <div class="stat-label">Complex Instructions</div>
-                    </div>
-                </div>
-            </section>
+  <!-- Page 3: IMAGINATION (no card) -->
+  <section class="snap" id="imagination">
+    <div class="fullbleed">
+      <h2 class="section-title">Imagination</h2>
 
-            <!-- Key Features -->
-            <section class="section">
-                <h2 class="section-title">Key Features</h2>
-                <div class="features">
-                    <div class="feature-card">
-                        <div class="feature-icon">🎨</div>
-                        <div class="feature-title">Surreal Fantasy Generation</div>
-                        <p>Generate imaginative and creative content that goes beyond real-world constraints, enabling truly unique visual storytelling.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">🖼️</div>
-                        <div class="feature-title">Multi-Reference Processing</div>
-                        <p>Handle complex scenarios involving multiple input references to create cohesive and contextually rich generated images.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-title">📋</div>
-                        <div class="feature-title">Instruction Following</div>
-                        <p>Execute detailed and complex instructions with high fidelity, ensuring generated content matches specific requirements.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">🎯</div>
-                        <div class="feature-title">State-of-the-Art Performance</div>
-                        <p>Achieve superior results across multiple benchmarks, demonstrating the effectiveness of synthetic data training.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Sample Gallery -->
-            <section class="section">
-                <h2 class="section-title">Sample Gallery</h2>
-                <div class="gallery">
-                    <div class="gallery-item">
-                        <div class="image-placeholder">
-                            Surreal Fantasy Sample
-                        </div>
-                        <div class="item-content">
-                            <div class="item-title">Fantasy Landscape</div>
-                            <div class="item-description">A mystical forest with floating islands and luminescent trees, showcasing the model's ability to generate imaginative scenarios beyond real-world constraints.</div>
-                        </div>
-                    </div>
-                    
-                    <div class="gallery-item">
-                        <div class="image-placeholder">
-                            Multi-Reference Sample
-                        </div>
-                        <div class="item-content">
-                            <div class="item-title">Multi-Reference Composition</div>
-                            <div class="item-description">Complex scene combining multiple reference elements into a cohesive visual narrative, demonstrating advanced compositional understanding.</div>
-                        </div>
-                    </div>
-                    
-                    <div class="gallery-item">
-                        <div class="image-placeholder">
-                            Instruction Following Sample
-                        </div>
-                        <div class="item-content">
-                            <div class="item-title">Complex Instruction Execution</div>
-                            <div class="item-description">Precise execution of detailed instructions involving specific styles, compositions, and artistic requirements.</div>
-                        </div>
-                    </div>
-                    
-                    <div class="gallery-item">
-                        <div class="image-placeholder">
-                            Creative Synthesis Sample
-                        </div>
-                        <div class="item-content">
-                            <div class="item-title">Creative Synthesis</div>
-                            <div class="item-description">Innovative combination of concepts and styles, showcasing the model's creative potential in visual content generation.</div>
-                        </div>
-                    </div>
-                    
-                    <div class="gallery-item">
-                        <div class="image-placeholder">
-                            Technical Precision Sample
-                        </div>
-                        <div class="item-content">
-                            <div class="item-title">Technical Precision</div>
-                            <div class="item-description">High-fidelity generation with attention to technical details, lighting, and realistic rendering techniques.</div>
-                        </div>
-                    </div>
-                    
-                    <div class="gallery-item">
-                        <div class="image-placeholder">
-                            Artistic Style Sample
-                        </div>
-                        <div class="item-content">
-                            <div class="item-title">Artistic Style Transfer</div>
-                            <div class="item-description">Demonstration of various artistic styles and techniques, from classical painting to modern digital art approaches.</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Evaluation Benchmarks -->
-            <section class="section">
-                <h2 class="section-title">Evaluation Benchmarks</h2>
-                <div class="features">
-                    <div class="feature-card">
-                        <div class="feature-icon">📊</div>
-                        <div class="feature-title">GenEval++</div>
-                        <p>Enhanced evaluation framework with increased instruction complexity to address score saturation and improve assessment accuracy in text-to-image generation.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">💭</div>
-                        <div class="feature-title">Imagine-Bench</div>
-                        <p>Specialized benchmark for imaginative generation, evaluating fantasy fulfillment, identity preservation, and aesthetic quality across multiple dimensions.</p>
-                    </div>
-                </div>
-            </section>
+      <!-- 轨道：data-dir="ltr" 表示从左到右；--dur 控制速度 -->
+      <div class="ticker" data-dir="ltr" style="--dur: 55s;">
+        <div class="track">
+          <!-- 每张图用 --y 做上下错位（单位可以是 px/vh） -->
+          <div class="tile" style="--y:-18px"><img src="assets/samples/sample1.jpg" alt=""></div>
+          <div class="tile" style="--y:-60px"><img src="assets/samples/sample2.jpg" alt=""></div>
+          <div class="tile" style="--y:40px"><img src="assets/samples/sample3.jpg" alt=""></div>
+          <div class="tile" style="--y:-10px"><img src="assets/samples/sample4.jpg" alt=""></div>
+          <div class="tile" style="--y:60px"><img src="assets/samples/sample5.jpg" alt=""></div>
+          <div class="tile" style="--y:-28px"><img src="assets/samples/sample6.jpg" alt=""></div>
+          <div class="tile" style="--y:36px"><img src="assets/samples/sample7.jpg" alt=""></div>
+          <div class="tile" style="--y:-52px"><img src="assets/samples/sample8.jpg" alt=""></div>
         </div>
-    </main>
+        <!-- JS 会自动克隆 track 形成无缝循环，不用手动复制 -->
+      </div>
+    </div>
+  </section>
+  <!-- Page 4: MULTI-REFERENCE (groups slide together) -->
+  <section class="snap" id="multiref">
+    <div class="fullbleed">
+      <h2 class="section-title">Multi-Reference</h2>
 
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2025 Echo-4o Project. Advancing AI Image Generation through Synthetic Data.</p>
-            <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">
-                Research collaboration between Shanghai AI Lab, Sun Yat-sen University, CUHK MMLab, and Peking University
-            </p>
+      <!-- 行 1：从左到右，速度可调 -->
+      <div class="ticker row-gap" data-dir="ltr" style="--dur: 60s;">
+        <div class="track">
+          <!-- 组 1 -->
+          <div class="bundle">
+            <div class="cell"><span class="badge">Ref 1</span><img src="assets/mr/group1/ref1.jpg" alt=""></div>
+            <div class="cell"><span class="badge">Ref 2</span><img src="assets/mr/group1/ref2.jpg" alt=""></div>
+            <div class="cell"><span class="badge">Ref 3</span><img src="assets/mr/group1/ref3.jpg" alt=""></div>
+            <div class="cell"><span class="badge">Result</span><img src="assets/mr/group1/out.jpg"  alt=""></div>
+          </div>
+
+          <!-- 组 2 -->
+          <div class="bundle">
+            <div class="cell"><span class="badge">Ref 1</span><img src="assets/mr/group2/ref1.jpg" alt=""></div>
+            <div class="cell"><span class="badge">Ref 2</span><img src="assets/mr/group2/ref2.jpg" alt=""></div>
+            <div class="cell"><span class="badge">Ref 3</span><img src="assets/mr/group2/ref3.jpg" alt=""></div>
+            <div class="cell"><span class="badge">Result</span><img src="assets/mr/group2/out.jpg"  alt=""></div>
+          </div>
+
+          <!-- 组 3 … 按需继续添加 -->
         </div>
-    </footer>
+      </div>
 
-    <script>
-        // Add smooth scrolling for internal links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
+      <!-- 行 2：换个方向（右到左），有层次感 -->
+      <div class="ticker row-gap" data-dir="rtl" style="--dur: 70s;">
+        <div class="track">
+          <div class="bundle">
+            <div class="cell"><span class="badge">Ref 1</span><img src="assets/mr/group3/ref1.jpg" alt=""></div>
+            <div class="cell"><span class="badge">Ref 2</span><img src="assets/mr/group3/ref2.jpg" alt=""></div>
+            <div class="cell"><span class="badge">Ref 3</span><img src="assets/mr/group3/ref3.jpg" alt=""></div>
+            <div class="cell"><span class="badge">Result</span><img src="assets/mr/group3/out.jpg"  alt=""></div>
+          </div>
 
-        // Add loading animation to gallery items
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
+          <div class="bundle">
+            <div class="cell"><span class="badge">Ref 1</span><img src="assets/mr/group4/ref1.jpg" alt=""></div>
+            <div class="cell"><span class="badge">Ref 2</span><img src="assets/mr/group4/ref2.jpg" alt=""></div>
+            <div class="cell"><span class="badge">Ref 3</span><img src="assets/mr/group4/ref3.jpg" alt=""></div>
+            <div class="cell"><span class="badge">Result</span><img src="assets/mr/group4/out.jpg"  alt=""></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
 
-        // Initialize gallery items with animation
-        document.querySelectorAll('.gallery-item').forEach((item, index) => {
-            item.style.opacity = '0';
-            item.style.transform = 'translateY(30px)';
-            item.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
-            observer.observe(item);
-        });
+</div>
 
-        // Add click handler for external links
-        document.querySelectorAll('.link-btn').forEach(link => {
-            link.addEventListener('click', function(e) {
-                // Add a subtle click effect
-                this.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    this.style.transform = '';
-                }, 150);
-            });
-        });
-    </script>
+<!-- 右侧分页点 -->
+<div class="dots" id="dots"></div>
+
+<script>
+/* ===== 1) 右侧圆点 & 分页滚动控制 ===== */
+const container = document.getElementById('snapper');
+const sections = Array.from(document.querySelectorAll('section.snap'));
+const dotsWrap = document.getElementById('dots');
+
+let active = 0;
+sections.forEach((_,i)=>{
+  const d=document.createElement('div'); d.className='dot'; d.addEventListener('click',()=>go(i));
+  dotsWrap.appendChild(d);
+});
+function mark(i){
+  active=i;
+  dotsWrap.querySelectorAll('.dot').forEach((el,idx)=>el.classList.toggle('active', idx===i));
+}
+function go(i){
+  i=Math.max(0,Math.min(sections.length-1,i));
+  sections[i].scrollIntoView({behavior:'smooth'});
+  mark(i);
+}
+mark(0);
+
+/* 滚轮/触摸节流，强化“整屏翻页”手感 */
+let lock=0;
+container.addEventListener('wheel',e=>{
+  e.preventDefault();
+  if(lock) return;
+  lock=1;
+  const dir = e.deltaY>0 ? 1 : -1;
+  go(active+dir);
+  setTimeout(()=>lock=0, 650);   // 过渡时间
+},{passive:false});
+
+/* 键盘 ↑↓ 翻页 */
+window.addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown' || e.key==='PageDown') go(active+1);
+  if(e.key==='ArrowUp' || e.key==='PageUp') go(active-1);
+});
+
+/* 监听滚动（手动拖动时同步圆点） */
+const obs = new IntersectionObserver((ents)=>{
+  ents.forEach(ent=>{
+    if(ent.isIntersecting){
+      const idx = sections.indexOf(ent.target);
+      if(idx!==-1) mark(idx);
+    }
+  });
+}, {root:container, threshold:.6});
+sections.forEach(s=>obs.observe(s));
+
+/* ===== 2) 统计环图（小巧 Canvas） ===== */
+function ring(el){
+  const size = el.clientWidth;
+  const c = document.createElement('canvas');
+  c.width=c.height=size; el.appendChild(c);
+  const ctx=c.getContext('2d');
+  const color=el.dataset.color, track=el.dataset.track||'#333';
+  const val=+el.dataset.value, total=+el.dataset.total;
+  const pct = Math.max(0, Math.min(1, val/total));
+  const cx=size/2, cy=size/2, r=size/2-14, lw=20;
+
+  // 背景环
+  ctx.lineCap='round';
+  ctx.lineWidth=lw;
+  ctx.strokeStyle=track;
+  ctx.beginPath(); ctx.arc(cx,cy,r,-Math.PI/2, 1.5*Math.PI); ctx.stroke();
+
+  // 前景环
+  ctx.strokeStyle=color;
+  ctx.beginPath(); ctx.arc(cx,cy,r,-Math.PI/2, -Math.PI/2 + 2*Math.PI*pct); ctx.stroke();
+
+  // 中心文本
+  const center=document.createElement('div');
+  center.className='center';
+  center.innerHTML = `${val.toLocaleString()}<small>Images</small>`;
+  el.appendChild(center);
+}
+document.querySelectorAll('.ring').forEach(ring);
+
+// ✅ 在同一个 .track 内构造 A+B，无缝循环
+document.querySelectorAll('.ticker .track').forEach(track=>{
+  const html = track.innerHTML;
+  track.insertAdjacentHTML('beforeend', html); // A 后面接 B
+});
+
+// 放在你现有 <script> 末尾
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click', e=>{
+    const id = a.getAttribute('href').slice(1);
+    const target = id && document.getElementById(id);
+    if(target){
+      e.preventDefault();
+      const idx = Array.from(document.querySelectorAll('section.snap')).indexOf(target);
+      if(idx >= 0) go(idx);
+    }
+  });
+});
+
+
+
+// Lightbox 打开/关闭
+const lb = document.getElementById('lb');
+const lbImg = document.getElementById('lb-img');
+function openLB(src){ lbImg.src = src; lb.classList.add('open'); }
+function closeLB(){ lb.classList.remove('open'); lbImg.src = ''; }
+document.getElementById('lb-close').addEventListener('click', closeLB);
+lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLB(); });
+window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeLB(); });
+
+// 给所有可点击图片绑定
+document.querySelectorAll('#imagination .tile img, #multiref .cell img')
+  .forEach(img=>{
+    img.addEventListener('click', ()=> openLB(img.src));
+  });
+
+</script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 title: YOUR DATASET NAME — Official Page
 description: "YOUR DATASET NAME: a high-quality dataset for TASKS. Download, browse samples, view leaderboard, and cite the paper."
-url: https://<your-username>.github.io
+url: https://a-yayaya.github.io
 baseurl: ""         # 如果是项目页（不是 username.github.io），填 "/你的仓库名"
 lang: zh-CN
 

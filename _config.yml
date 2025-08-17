@@ -1,25 +1,19 @@
-title: YOUR DATASET NAME — Official Page
-description: "YOUR DATASET NAME: a high-quality dataset for TASKS. Download, browse samples, view leaderboard, and cite the paper."
-url: https://a-yayaya.github.io
-baseurl: ""         # 如果是项目页（不是 username.github.io），填 "/你的仓库名"
-lang: zh-CN
+title: YOUR DATASET NAME
+description: "One-sentence intro for your dataset."
+url: https://a-yayaya.github.io   # 你的用户主页域名
+baseurl: ""                       # 用户主页必须为空
+lang: en
 
-# GitHub Pages 允许的插件
+theme: null
 plugins:
   - jekyll-seo-tag
   - jekyll-sitemap
 
-# 关主题，用自定义布局
-theme: null
-
-# 静态资源目录
-collections: []
 markdown: kramdown
 kramdown:
   input: GFM
 
-# SEO 默认图（请确保存在）
 defaults:
   - scope: { path: "" }
     values:
-      image: /assets/teaser.jpg
+      image: /assets/teaser.jpg   # 分享卡片图

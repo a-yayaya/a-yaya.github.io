@@ -88,8 +88,13 @@
 
   .ticker { position:relative; overflow:hidden; }
   .ticker:hover .track{ animation-play-state: paused; }
+  /* 无缝滚动关键：一行内不换行、不收缩 */
   .ticker .track{
-    display:flex; align-items:center; gap:22px;
+    display:inline-flex;
+    align-items:center;
+    gap:22px;
+    flex-wrap:nowrap;
+    white-space:nowrap;
     will-change: transform;
     animation: marquee var(--dur,40s) linear infinite;
   }
@@ -97,7 +102,7 @@
   .ticker[data-dir="rtl"] .track{ animation-direction: normal; }
   @keyframes marquee{
     from { transform: translateX(0); }
-    to   { transform: translateX(-50%); }
+    to   { transform: translateX(-100%); }
   }
 
   .tile{
@@ -110,19 +115,37 @@
   .tile img{ width:100%; height:100%; object-fit:cover; display:block; }
 
   .bundle{
-    display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
-    border:1px solid var(--border); border-radius:16px; padding:8px;
+    display:flex;               /* 一组横向排布 */
+    gap:12px;
+    padding:12px;
+    border:1px solid var(--border);
+    border-radius:16px;
     background:#0f172a;
-    width: clamp(520px, 66vw, 820px);
-    height: clamp(140px, 24vh, 260px);
+    box-shadow:var(--shadow);
+    width:auto;
+    height:auto;
   }
-  .badge{
-    position:absolute; left:8px; top:8px;
-    font-size:12px; color:#e6e9ef; background:#111827; border:1px solid var(--border);
-    padding:2px 6px; border-radius:999px;
+
+  .bundle .cell{
+    position:relative;
+    width: clamp(120px, 16vw, 180px);  /* 单张大小，可调整 */
+    aspect-ratio: 1 / 1;               /* ✅ 保证正方形 */
+    border:1px solid var(--border);
+    border-radius:14px;
+    overflow:hidden;
   }
-  .bundle .cell{ position:relative; border-radius:12px; overflow:hidden; border:1px solid var(--border); }
-  .bundle img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+  .bundle img{
+    width:100%;
+    height:100%;
+    object-fit:cover;                  /* 或者 contain */
+    display:block;
+    background:#0f172a;
+    cursor:zoom-in;
+  }
+
+  /* 删除 badge 样式，不显示文字 */
+  .badge{ display:none !important; }
 
   .row-gap { margin-top: 16px; }
 
@@ -300,55 +323,57 @@
       </div>
     </div>
   </section>
-  <!-- Page 4: MULTI-REFERENCE (groups slide together) -->
+  <!-- Page 4: MULTI-REFERENCE (3-up bundles, seamless ticker) -->
   <section class="snap" id="multiref">
     <div class="fullbleed">
       <h2 class="section-title">Multi-Reference</h2>
 
-      <!-- 行 1：从左到右，速度可调 -->
-      <div class="ticker row-gap" data-dir="ltr" style="--dur: 60s;">
+      <!-- 行 1：左→右 -->
+      <div class="ticker row-gap" data-dir="ltr" style="--dur: 12s;">
         <div class="track">
-          <!-- 组 1 -->
+          <!-- 组 1：background / input / output -->
           <div class="bundle">
-            <div class="cell"><span class="badge">Ref 1</span><img src="assets/mr/group1/ref1.jpg" alt=""></div>
-            <div class="cell"><span class="badge">Ref 2</span><img src="assets/mr/group1/ref2.jpg" alt=""></div>
-            <div class="cell"><span class="badge">Ref 3</span><img src="assets/mr/group1/ref3.jpg" alt=""></div>
-            <div class="cell"><span class="badge">Result</span><img src="assets/mr/group1/out.jpg"  alt=""></div>
+            <div class="cell"><img src="assets/mr/group1/000047_background.png" alt=""></div>
+            <div class="cell"><img src="assets/mr/group1/000047_input.png"      alt=""></div>
+            <div class="cell"><img src="assets/mr/group1/000047_output.png"     alt=""></div>
           </div>
 
-          <!-- 组 2 -->
+          <!-- 组 2：ref1 / ref2 / out -->
           <div class="bundle">
-            <div class="cell"><span class="badge">Ref 1</span><img src="assets/mr/group2/ref1.jpg" alt=""></div>
-            <div class="cell"><span class="badge">Ref 2</span><img src="assets/mr/group2/ref2.jpg" alt=""></div>
-            <div class="cell"><span class="badge">Ref 3</span><img src="assets/mr/group2/ref3.jpg" alt=""></div>
-            <div class="cell"><span class="badge">Result</span><img src="assets/mr/group2/out.jpg"  alt=""></div>
+            <div class="cell"><img src="assets/mr/group2/ref1.jpg" alt=""></div>
+            <div class="cell"><img src="assets/mr/group2/ref2.jpg" alt=""></div>
+            <div class="cell"><img src="assets/mr/group2/out.jpg"  alt=""></div>
           </div>
 
-          <!-- 组 3 … 按需继续添加 -->
+          <!-- 如需更多组，继续按 3 张结构添加 -->
+          <!--
+          <div class="bundle">
+            <div class="cell"><img src="assets/mr/groupX/ref1.jpg" alt=""></div>
+            <div class="cell"><img src="assets/mr/groupX/ref2.jpg" alt=""></div>
+            <div class="cell"><img src="assets/mr/groupX/out.jpg"  alt=""></div>
+          </div>
+          -->
         </div>
       </div>
 
-      <!-- 行 2：换个方向（右到左），有层次感 -->
-      <div class="ticker row-gap" data-dir="rtl" style="--dur: 70s;">
+      <!-- 行 2：右→左 -->
+      <div class="ticker row-gap" data-dir="rtl" style="--dur: 16s;">
         <div class="track">
           <div class="bundle">
-            <div class="cell"><span class="badge">Ref 1</span><img src="assets/mr/group3/ref1.jpg" alt=""></div>
-            <div class="cell"><span class="badge">Ref 2</span><img src="assets/mr/group3/ref2.jpg" alt=""></div>
-            <div class="cell"><span class="badge">Ref 3</span><img src="assets/mr/group3/ref3.jpg" alt=""></div>
-            <div class="cell"><span class="badge">Result</span><img src="assets/mr/group3/out.jpg"  alt=""></div>
+            <div class="cell"><img src="assets/mr/group3/ref1.jpg" alt=""></div>
+            <div class="cell"><img src="assets/mr/group3/ref2.jpg" alt=""></div>
+            <div class="cell"><img src="assets/mr/group3/out.jpg"  alt=""></div>
           </div>
 
           <div class="bundle">
-            <div class="cell"><span class="badge">Ref 1</span><img src="assets/mr/group4/ref1.jpg" alt=""></div>
-            <div class="cell"><span class="badge">Ref 2</span><img src="assets/mr/group4/ref2.jpg" alt=""></div>
-            <div class="cell"><span class="badge">Ref 3</span><img src="assets/mr/group4/ref3.jpg" alt=""></div>
-            <div class="cell"><span class="badge">Result</span><img src="assets/mr/group4/out.jpg"  alt=""></div>
+            <div class="cell"><img src="assets/mr/group4/ref1.jpg" alt=""></div>
+            <div class="cell"><img src="assets/mr/group4/ref2.jpg" alt=""></div>
+            <div class="cell"><img src="assets/mr/group4/out.jpg"  alt=""></div>
           </div>
         </div>
       </div>
     </div>
   </section>
-
 
 </div>
 
@@ -438,6 +463,7 @@ document.querySelectorAll('.ring').forEach(ring);
 document.querySelectorAll('.ticker .track').forEach(track=>{
   const html = track.innerHTML;
   track.insertAdjacentHTML('beforeend', html); // A 后面接 B
+  track.insertAdjacentHTML('beforeend', html); // 再加一次 → A+B+A+B
 });
 
 // 放在你现有 <script> 末尾

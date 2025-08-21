@@ -6,11 +6,11 @@
 <title>ConsistCompose-Image — Gallery</title>
 <style>
   :root{
-    --bg:#0b0f19;        /* 背景(深) */
-    --text:#e6e9ef;      /* 文字 */
-    --muted:#9aa3b2;     /* 次级文字 */
-    --card:#111827;      /* 卡片底色 */
-    --border:#1f2937;    /* 卡片描边 */
+    --bg:#0b0f19;
+    --text:#e6e9ef;
+    --muted:#9aa3b2;
+    --card:#111827;
+    --border:#1f2937;
     --shadow: 0 10px 30px rgba(0,0,0,.35);
     --blue:#60a5fa; --pink:#fb72c3; --violet:#a78bfa;
     --maxw:1200px; --radius:20px;
@@ -38,7 +38,7 @@
     position:relative; z-index:0;
     display:flex; align-items:center; justify-content:center;
     padding:24px;
-    overflow:hidden;       /* 防止下一屏内容探出 */
+    overflow:hidden;
   }
 
   .inner{ width:100%; max-width:var(--maxw); padding:24px; }
@@ -75,7 +75,7 @@
   .cap:before{content:""; width:6px; height:24px; border-radius:6px;
     background:linear-gradient(180deg, var(--pink), var(--violet))}
 
-  /* ===== full-bleed 无外框的整屏图片走马灯 ===== */
+  /* ===== full-bleed ===== */
   .fullbleed { width:100%; max-width:1200px; margin:0 auto; padding:0 24px; }
   .section-title {
     display:flex; align-items:center; gap:10px; margin:8px 0 18px;
@@ -86,25 +86,17 @@
     background:linear-gradient(180deg,#fb72c3,#a78bfa);
   }
 
+  /* ===== 普通 ticker 的基础样式（作为素材池存在） ===== */
   .ticker { position:relative; overflow:hidden; }
-  .ticker:hover .track{ animation-play-state: paused; }
-  /* 无缝滚动关键：一行内不换行、不收缩 */
   .ticker .track{
     display:inline-flex;
     align-items:center;
     gap:22px;
     flex-wrap:nowrap;
     white-space:nowrap;
-    will-change: transform;
-    animation: marquee var(--dur,40s) linear infinite;
-  }
-  .ticker[data-dir="ltr"] .track{ animation-direction: reverse; }
-  .ticker[data-dir="rtl"] .track{ animation-direction: normal; }
-  @keyframes marquee{
-    from { transform: translateX(0); }
-    to   { transform: translateX(-100%); }
   }
 
+  /* ===== tile / bundle ===== */
   .tile{
     border-radius:16px; border:1px solid var(--border);
     background:#0f172a; overflow:hidden;
@@ -115,7 +107,7 @@
   .tile img{ width:100%; height:100%; object-fit:cover; display:block; }
 
   .bundle{
-    display:flex;               /* 一组横向排布 */
+    display:flex;
     gap:12px;
     padding:12px;
     border:1px solid var(--border);
@@ -125,28 +117,24 @@
     width:auto;
     height:auto;
   }
-
   .bundle .cell{
     position:relative;
-    width: clamp(120px, 16vw, 180px);  /* 单张大小，可调整 */
-    aspect-ratio: 1 / 1;               /* ✅ 保证正方形 */
+    width: clamp(120px, 16vw, 180px);
+    aspect-ratio: 1 / 1;
     border:1px solid var(--border);
     border-radius:14px;
     overflow:hidden;
   }
-
   .bundle img{
     width:100%;
     height:100%;
-    object-fit:cover;                  /* 或者 contain */
+    object-fit:cover;
     display:block;
     background:#0f172a;
     cursor:zoom-in;
   }
 
-  /* 删除 badge 样式，不显示文字 */
   .badge{ display:none !important; }
-
   .row-gap { margin-top: 16px; }
 
   /* ===== Lightbox ===== */
@@ -168,88 +156,71 @@
     background:rgba(17,24,39,.6); border:1px solid var(--border);
     padding:6px 12px; border-radius:12px;
   }
-  .tile img, .bundle img{ cursor:zoom-in; }
-/* ===== 通用 hero 文案/按钮排版 ===== */
-.hero-content {
-  position:relative;
-  z-index:1;
-  color:#fff;
-  text-align:center;
+
+  /* ===== HERO ===== */
+  .hero-content { position:relative; z-index:1; color:#fff; text-align:center; }
+  .hero-content h1{ font-size:clamp(36px,6vw,72px); line-height:1.05; font-weight:900; letter-spacing:.3px; }
+  .hero-content p{ margin-top:12px; font-size:clamp(16px,2.2vw,22px); color:#cbd5e1; }
+  .hero-buttons{ margin-top:20px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .hero-buttons .btn{
+    display:inline-flex; align-items:center; gap:8px; padding:10px 16px;
+    border:1px solid var(--border, #334155); border-radius:999px;
+    background:#0f172a; color:#fff; text-decoration:none;
+  }
+  .hero-buttons .btn:hover{ background:#111827; }
+
+  .snap.hero-landing{ min-height:100vh; padding:0; margin:0; position:relative; isolation:isolate; overflow:hidden; z-index:0; }
+  .snap.hero-landing .hero-bg{
+    position:absolute; left:50%; top:50%;
+    width:100vw; height:100vh; transform:translate(-50%,-50%) scale(1.12);
+    object-fit:cover; filter:blur(8px) brightness(.85); z-index:0; pointer-events:none;
+  }
+  .snap.hero-landing .hero-content{ position:relative; z-index:1; padding:clamp(16px,2vw,32px); }
+  .hero-logo{ width:88px; height:88px; border-radius:18px; display:inline-block; margin-bottom:16px; }
+
+  /* ===== 悬停放大 ===== */
+  .tile img:hover,
+  .bundle img:hover {
+    transform: scale(1.05);
+    transition: transform 0.25s ease;
+  }
+
+  /* ===== 子弹流：隐藏素材轨道 + 轨道/弹体样式 ===== */
+/* 子弹流：隐藏素材轨道 + 固定容器高度 */
+.ticker.shoot .track{ display:none; }                 /* 素材池只用于克隆，不显示 */
+.ticker.shoot {
+  position: relative;
+  overflow: hidden;
+  height: var(--shoot-h, 260px);                      /* ← 有默认高度，JS 会实时更新 */
 }
-.hero-content h1{
-  font-size:clamp(36px,6vw,72px);
-  line-height:1.05;
-  font-weight:900;
-  letter-spacing:.3px;
-}
-.hero-content p{
-  margin-top:12px;
-  font-size:clamp(16px,2.2vw,22px);
-  color:#cbd5e1;
-}
-.hero-buttons{
-  margin-top:20px;
-  display:flex;
-  gap:12px;
-  justify-content:center;
-  flex-wrap:wrap;
-}
-.hero-buttons .btn{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 16px;
-  border:1px solid var(--border, #334155);
-  border-radius:999px;
-  background:#0f172a;
-  color:#fff;
-  text-decoration:none;
-}
-.hero-buttons .btn:hover{
-  background:#111827;
+.ticker.shoot .lane {
+  position: relative;
+  width: 100%;
+  height: 100%;                                       /* ← 撑满 ticker，便于居中 */
 }
 
-/* ===== HERO 首页整屏背景，用 <img> 满屏，不留白边 ===== */
-.snap.hero-landing{
-  min-height:100vh;
-  padding:0;
-  margin:0;
-  position:relative;
-  isolation:isolate;
-  overflow:hidden;     /* 裁掉 blur 造成的溢出 */
-  z-index:0;
+/* 发射的“弹体” */
+.ticker.shoot .bolt {
+  position: absolute;
+  top: 50%; left: 100%;
+  transform: translate3d(0,-50%,0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.ticker.shoot .bolt img {
+  display:block; width:100%; height:100%; object-fit:cover;
 }
 
-/* 背景图层 */
-.snap.hero-landing .hero-bg{
-  position:absolute;
-  left:50%; top:50%;
-  width:100vw; height:100vh;     /* 铺满视口 */
-  transform:translate(-50%,-50%) scale(1.12); /* 居中+放大，防止露边 */
-  object-fit:cover;
-  filter:blur(8px) brightness(.85);  /* 虚化+压暗 */
-  z-index:0;
-  pointer-events:none;
-}
+/* 悬停暂停（可保留/可删） */
+.ticker.shoot:hover .bolt { animation-play-state: paused; }
 
-/* 内容层在上 */
-.snap.hero-landing .hero-content{
-  position:relative;
-  z-index:1;
-  padding:clamp(16px,2vw,32px);
+/* 从右侧飞过整个视口（距离 = 视口宽 + 自身宽） */
+@keyframes bullet {
+  from { transform: translate3d(0,-50%,0); }
+  to   { transform: translate3d(calc(-100vw - var(--w, 300px)),-50%,0); }
 }
-
-/* Logo */
-.hero-logo{
-  width:88px; height:88px;
-  border-radius:18px;
-  display:inline-block;
-  margin-bottom:16px;
-}
-
 </style>
 </head>
-
 
 <body>
 
@@ -258,25 +229,23 @@
   <img id="lb-img" alt="">
   <div class="lb-close" id="lb-close">×</div>
 </div>
+
 <div class="snap-container" id="snapper">
   <!-- Hero Section -->
-<section class="snap hero-landing" id="home">
-  <!-- 背景图（用于虚化） -->
-  <img class="hero-bg" src="assets/logo.png" alt="Hero" />
-
-  <!-- 文字/按钮 -->
-  <div class="hero-content">
-    <img src="assets/logo.png" alt="Logo" class="hero-logo">
-    <h1>ConsistCompose Dataset</h1>
-    <p>Dataset Gallery of ConsistCompose Data</p>
-    <div class="hero-buttons">
-      <a href="#stats" class="btn">● Explore</a>
-      <a href="paper.pdf" class="btn">📄 Paper</a>
-      <a href="https://github.com/xxx" class="btn">💻 Code</a>
-      <a href="dataset.zip" class="btn">📂 Dataset</a>
+  <section class="snap hero-landing" id="home">
+    <img class="hero-bg" src="assets/logo.png" alt="Hero" />
+    <div class="hero-content">
+      <img src="assets/logo.png" alt="Logo" class="hero-logo">
+      <h1>ConsistCompose Dataset</h1>
+      <p>Dataset Gallery of ConsistCompose Data</p>
+      <div class="hero-buttons">
+        <a href="#stats" class="btn">● Explore</a>
+        <a href="paper.pdf" class="btn">📄 Paper</a>
+        <a href="https://github.com/xxx" class="btn">💻 Code</a>
+        <a href="dataset.zip" class="btn">📂 Dataset</a>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
   <!-- Page 2: STATS -->
   <section class="snap" id="stats">
@@ -301,15 +270,14 @@
     </div>
   </section>
 
-  <!-- Page 3: IMAGINATION (no card) -->
+  <!-- Page 3: IMAGINATION -->
   <section class="snap" id="imagination">
     <div class="fullbleed">
       <h2 class="section-title">Imagination</h2>
 
-      <!-- 轨道：data-dir="ltr" 表示从左到右；--dur 控制速度 -->
-      <div class="ticker" data-dir="ltr" style="--dur: 55s;">
+      <!-- 改为 shoot：用 .tile 作为“子弹单元” -->
+      <div class="ticker shoot" data-mode="shoot" data-speed="160" data-gap="22">
         <div class="track">
-          <!-- 每张图用 --y 做上下错位（单位可以是 px/vh） -->
           <div class="tile" style="--y:-18px"><img src="assets/samples/sample1.jpg" alt=""></div>
           <div class="tile" style="--y:-60px"><img src="assets/samples/sample2.jpg" alt=""></div>
           <div class="tile" style="--y:40px"><img src="assets/samples/sample3.jpg" alt=""></div>
@@ -319,52 +287,39 @@
           <div class="tile" style="--y:36px"><img src="assets/samples/sample7.jpg" alt=""></div>
           <div class="tile" style="--y:-52px"><img src="assets/samples/sample8.jpg" alt=""></div>
         </div>
-        <!-- JS 会自动克隆 track 形成无缝循环，不用手动复制 -->
       </div>
     </div>
   </section>
-  <!-- Page 4: MULTI-REFERENCE (3-up bundles, seamless ticker) -->
+
+  <!-- Page 4: MULTI-REFERENCE（两行都改为 shoot，用 bundle 作为单元） -->
   <section class="snap" id="multiref">
     <div class="fullbleed">
       <h2 class="section-title">Multi-Reference</h2>
 
-      <!-- 行 1：左→右 -->
-      <div class="ticker row-gap" data-dir="ltr" style="--dur: 12s;">
+      <!-- 行 1：左→右（速度可自行调高一点） -->
+      <div class="ticker row-gap shoot" data-mode="shoot" data-speed="220" data-gap="24">
         <div class="track">
-          <!-- 组 1：background / input / output -->
           <div class="bundle">
             <div class="cell"><img src="assets/mr/group1/000047_background.png" alt=""></div>
             <div class="cell"><img src="assets/mr/group1/000047_input.png"      alt=""></div>
             <div class="cell"><img src="assets/mr/group1/000047_output.png"     alt=""></div>
           </div>
-
-          <!-- 组 2：ref1 / ref2 / out -->
           <div class="bundle">
             <div class="cell"><img src="assets/mr/group2/ref1.jpg" alt=""></div>
             <div class="cell"><img src="assets/mr/group2/ref2.jpg" alt=""></div>
             <div class="cell"><img src="assets/mr/group2/out.jpg"  alt=""></div>
           </div>
-
-          <!-- 如需更多组，继续按 3 张结构添加 -->
-          <!--
-          <div class="bundle">
-            <div class="cell"><img src="assets/mr/groupX/ref1.jpg" alt=""></div>
-            <div class="cell"><img src="assets/mr/groupX/ref2.jpg" alt=""></div>
-            <div class="cell"><img src="assets/mr/groupX/out.jpg"  alt=""></div>
-          </div>
-          -->
         </div>
       </div>
 
-      <!-- 行 2：右→左 -->
-      <div class="ticker row-gap" data-dir="rtl" style="--dur: 16s;">
+      <!-- 行 2：右→左（也可以 shoot；如果想反向，可在 JS 里加 direction 支持） -->
+      <div class="ticker row-gap shoot" data-mode="shoot" data-speed="200" data-gap="24">
         <div class="track">
           <div class="bundle">
             <div class="cell"><img src="assets/mr/group3/ref1.jpg" alt=""></div>
             <div class="cell"><img src="assets/mr/group3/ref2.jpg" alt=""></div>
             <div class="cell"><img src="assets/mr/group3/out.jpg"  alt=""></div>
           </div>
-
           <div class="bundle">
             <div class="cell"><img src="assets/mr/group4/ref1.jpg" alt=""></div>
             <div class="cell"><img src="assets/mr/group4/ref2.jpg" alt=""></div>
@@ -372,9 +327,9 @@
           </div>
         </div>
       </div>
+
     </div>
   </section>
-
 </div>
 
 <!-- 右侧分页点 -->
@@ -402,7 +357,7 @@ function go(i){
 }
 mark(0);
 
-/* 滚轮/触摸节流，强化“整屏翻页”手感 */
+/* 滚轮/触摸节流 */
 let lock=0;
 container.addEventListener('wheel',e=>{
   e.preventDefault();
@@ -410,7 +365,7 @@ container.addEventListener('wheel',e=>{
   lock=1;
   const dir = e.deltaY>0 ? 1 : -1;
   go(active+dir);
-  setTimeout(()=>lock=0, 650);   // 过渡时间
+  setTimeout(()=>lock=0, 650);
 },{passive:false});
 
 /* 键盘 ↑↓ 翻页 */
@@ -430,7 +385,7 @@ const obs = new IntersectionObserver((ents)=>{
 }, {root:container, threshold:.6});
 sections.forEach(s=>obs.observe(s));
 
-/* ===== 2) 统计环图（小巧 Canvas） ===== */
+/* ===== 2) 统计环图 ===== */
 function ring(el){
   const size = el.clientWidth;
   const c = document.createElement('canvas');
@@ -441,17 +396,14 @@ function ring(el){
   const pct = Math.max(0, Math.min(1, val/total));
   const cx=size/2, cy=size/2, r=size/2-14, lw=20;
 
-  // 背景环
   ctx.lineCap='round';
   ctx.lineWidth=lw;
   ctx.strokeStyle=track;
   ctx.beginPath(); ctx.arc(cx,cy,r,-Math.PI/2, 1.5*Math.PI); ctx.stroke();
 
-  // 前景环
   ctx.strokeStyle=color;
   ctx.beginPath(); ctx.arc(cx,cy,r,-Math.PI/2, -Math.PI/2 + 2*Math.PI*pct); ctx.stroke();
 
-  // 中心文本
   const center=document.createElement('div');
   center.className='center';
   center.innerHTML = `${val.toLocaleString()}<small>Images</small>`;
@@ -459,14 +411,7 @@ function ring(el){
 }
 document.querySelectorAll('.ring').forEach(ring);
 
-// ✅ 在同一个 .track 内构造 A+B，无缝循环
-document.querySelectorAll('.ticker .track').forEach(track=>{
-  const html = track.innerHTML;
-  track.insertAdjacentHTML('beforeend', html); // A 后面接 B
-  track.insertAdjacentHTML('beforeend', html); // 再加一次 → A+B+A+B
-});
-
-// 放在你现有 <script> 末尾
+/* 内链锚点平滑跳转 */
 document.querySelectorAll('a[href^="#"]').forEach(a=>{
   a.addEventListener('click', e=>{
     const id = a.getAttribute('href').slice(1);
@@ -479,9 +424,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
   });
 });
 
-
-
-// Lightbox 打开/关闭
+/* ===== Lightbox ===== */
 const lb = document.getElementById('lb');
 const lbImg = document.getElementById('lb-img');
 function openLB(src){ lbImg.src = src; lb.classList.add('open'); }
@@ -490,11 +433,103 @@ document.getElementById('lb-close').addEventListener('click', closeLB);
 lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLB(); });
 window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeLB(); });
 
-// 给所有可点击图片绑定
-document.querySelectorAll('#imagination .tile img, #multiref .cell img')
-  .forEach(img=>{
-    img.addEventListener('click', ()=> openLB(img.src));
+/* 委托给整个文档：点击任何 lane 里的图片都能打开 Lightbox */
+document.addEventListener('click', (e)=>{
+  const img = e.target.closest('.lane img');
+  if(img) openLB(img.src);
+});
+
+/* ===== 3) 子弹式滚动（通用：支持 .bundle 或 .tile 作为单元） ===== */
+function initShootTicker(ticker){
+  const track = ticker.querySelector('.track');
+
+  // 发射轨道
+  const lane = document.createElement('div');
+  lane.className = 'lane';
+  ticker.appendChild(lane);
+
+  // 参数
+  const SPEED = +(ticker.dataset.speed || 180); // px/s，仅用于动画时长
+  const GAP   = +(ticker.dataset.gap   || 22);  // 固定间隔（像素）
+
+  // 素材单元：优先 bundle，其次 tile，最后直接子元素
+  let units = track ? Array.from(track.querySelectorAll('.bundle')) : [];
+  if(!units.length && track) units = Array.from(track.querySelectorAll('.tile'));
+  if(!units.length && track) units = Array.from(track.children || []);
+  if(!units.length) return;
+
+  // 先探针测高度，撑开容器
+  (function setInitialHeight(){
+    const probe = units[0].cloneNode(true);
+    probe.style.visibility = 'hidden';
+    probe.style.position = 'absolute';
+    probe.style.left = '-9999px';
+    ticker.appendChild(probe);
+    const h = probe.offsetHeight || probe.getBoundingClientRect().height || 260;
+    ticker.style.setProperty('--shoot-h', h + 'px');
+    probe.remove();
+  })();
+
+  let idx = 0;
+  let paused = false;
+  let destroyed = false;
+
+  // 是否满足“固定间隔 GAP”后可以发射下一发：
+  function readyToSpawn(){
+    const last = lane.querySelector('.bolt:last-of-type');
+    if(!last) return true; // 没有在飞的子弹，立刻发
+    const lastRect = last.getBoundingClientRect();
+    const tRect = ticker.getBoundingClientRect();
+    const space = tRect.right - lastRect.right; // 上一发右边缘到容器右边缘的空间
+    return space >= GAP;
+  }
+
+  function spawn(){
+    const node = units[idx++ % units.length].cloneNode(true);
+    node.classList.add('bolt');
+    lane.appendChild(node);
+
+    requestAnimationFrame(()=>{
+      const w = node.offsetWidth || 260;
+      const h = node.offsetHeight || 260;
+      ticker.style.setProperty('--shoot-h', h + 'px');
+      node.style.setProperty('--w', w + 'px');
+
+      const distance = ticker.clientWidth + w;   // 需要飞过的距离
+      const dur = distance / SPEED;              // 动画时长(s)
+
+      node.style.animation = `bullet ${dur}s linear forwards`;
+      node.addEventListener('animationend', ()=> node.remove());
+      if (paused) node.style.animationPlayState = 'paused';
+    });
+  }
+
+  // 主循环：按帧检查距离，满足就发射；暂停时只不发射
+  function loop(){
+    if (!destroyed){
+      if (!paused && readyToSpawn()) spawn();
+      requestAnimationFrame(loop);
+    }
+  }
+  loop();
+
+  // 悬停暂停/恢复当前全部子弹（空间间隔由 loop 继续保证）
+  ticker.addEventListener('mouseenter', ()=>{
+    paused = true;
+    lane.querySelectorAll('.bolt').forEach(b=> b.style.animationPlayState = 'paused');
   });
+  ticker.addEventListener('mouseleave', ()=>{
+    paused = false;
+    lane.querySelectorAll('.bolt').forEach(b=> b.style.animationPlayState = 'running');
+  });
+
+  return ()=>{ destroyed = true; };
+}
+
+
+
+// 初始化所有 shoot ticker
+document.querySelectorAll('.ticker[data-mode="shoot"]').forEach(initShootTicker);
 
 </script>
 </body>

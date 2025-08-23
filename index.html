@@ -219,6 +219,142 @@
   from { transform: translate3d(0,-50%,0); }
   to   { transform: translate3d(calc(-100vw - var(--w, 300px)),-50%,0); }
 }
+
+/* 全站固定背景：一张大图 */
+html, body {
+  height: 100%;
+}
+body {
+  /* 你的主题文字颜色仍然按原来写 */
+  background: transparent;  /* 重要：让下面 ::before 负责真正的背景 */
+}
+
+/* 背景图层：固定在视口，铺满，所有页面共享 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;              /* 永远在内容后面 */
+  background-image:
+    /* 可选：在最上面叠一层由下到上变暗的渐变，便于读标题 */
+    linear-gradient(to top, rgba(10,10,20,0.85), rgba(10,10,20,0.15)),
+    url("assets/logo.png");   /* ← 你的拼好的大图 */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: none;             /* 想要更柔和可以加 blur/brightness */
+}
+
+/* 你已有的内容容器要有层级，盖在背景上 */
+.snap-container, section.snap, .main-content {
+  position: relative;
+  z-index: 0;
+}
+
+
+/* === 两格演示：容器与面板 === */
+.compose-demo { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.compose-stage {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.compose-pane {
+  position: relative;
+  height: clamp(280px, 52vh, 420px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: #0f172a;
+  box-shadow: var(--shadow);
+}
+
+/* 每一层都是一张背景图，按时间表控制透明度/位移 */
+.compose-layer {
+  position: absolute; inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0; transform: translateX(0);
+}
+
+/* 时间轴：总时长可用 --dur 控制，默认 12s 循环 */
+.compose-stage { --dur: 12s; }
+
+/* —— 左侧时间表：bg → bg+box → output —— */
+.left .bg      { background-image: var(--bg);     animation: L_bg var(--dur) ease-in-out infinite; }
+.left .bgbox   { background-image: var(--bgbox);  animation: L_bgbox var(--dur) ease-in-out infinite; }
+.left .output  { background-image: var(--out);    animation: L_out var(--dur) ease-in-out infinite; }
+
+/* —— 右侧时间表：bg+box → object → out+box —— */
+.right .bgbox  { background-image: var(--bgbox);  animation: R_bgbox var(--dur) ease-in-out infinite; }
+.right .object { background-image: var(--obj);    animation: R_obj var(--dur) ease-in-out infinite; }
+.right .outbox { background-image: var(--outbox); animation: R_outbox var(--dur) ease-in-out infinite; }
+
+/* ===== Keyframes：按百分比分镜头（可微调） ===== */
+
+/* 左：最开始显示 bg */
+@keyframes L_bg{
+  0%{opacity:1}
+  18%{opacity:1}
+  28%{opacity:0} /* 即将被 bgbox 取代 */
+  100%{opacity:0}
+}
+
+/* 左：把带框版本“左移替换”，实际上是淡入 */
+@keyframes L_bgbox{
+  0%{opacity:0}
+  18%{opacity:0}
+  22%{opacity:1}           /* 与右侧的“出现框”形成衔接 */
+  42%{opacity:1}
+  52%{opacity:0}           /* 准备切到 output */
+  100%{opacity:0}
+}
+
+/* 左：出现最终 output（在右侧“object 左移并淡出”期间切入） */
+@keyframes L_out{
+  0%{opacity:0}
+  48%{opacity:0}
+  60%{opacity:1}
+  90%{opacity:1}
+  100%{opacity:0}          /* 为下一轮循环 */
+}
+
+/* 右：先出现带框背景，给用户暗示插入位置 */
+@keyframes R_bgbox{
+  0%{opacity:0; transform:translateX(24px)}
+  10%{opacity:1; transform:translateX(0)}
+  28%{opacity:1}
+  34%{opacity:0}           /* 让位给 object */
+  100%{opacity:0}
+}
+
+/* 右：主体出现 → 向左移动同时变透明（模拟“移入合成”） */
+@keyframes R_obj{
+  0%{opacity:0; transform:translateX(24px)}
+  26%{opacity:0; transform:translateX(24px)}
+  32%{opacity:1; transform:translateX(0)}   /* 进入右格 */
+  48%{opacity:1; transform:translateX(0)}
+  60%{opacity:0; transform:translateX(-120%)} /* 左移并淡出 */
+  100%{opacity:0; transform:translateX(-120%)}
+}
+
+/* 右：最后出现带框的输出结果 */
+@keyframes R_outbox{
+  0%{opacity:0; transform:translateX(24px)}
+  58%{opacity:0; transform:translateX(24px)}
+  68%{opacity:1; transform:translateX(0)}
+  90%{opacity:1}
+  100%{opacity:0}
+}
+
+/* 小标题 */
+.compose-caption{
+  display:flex; justify-content:space-between; align-items:center;
+  font-weight:700; margin:10px 2px 0; color:var(--muted);
+  font-size:.92rem;
+}
+
 </style>
 </head>
 
@@ -233,7 +369,7 @@
 <div class="snap-container" id="snapper">
   <!-- Hero Section -->
   <section class="snap hero-landing" id="home">
-    <img class="hero-bg" src="assets/logo.png" alt="Hero" />
+    <!-- <img class="hero-bg" src="assets/logo.png" alt="Hero" /> -->
     <div class="hero-content">
       <img src="assets/logo.png" alt="Logo" class="hero-logo">
       <h1>ConsistCompose Dataset</h1>
@@ -327,7 +463,41 @@
           </div>
         </div>
       </div>
+    </div>
+  </section>
+  <section class="snap" id="compose-demo">
+    <div class="fullbleed compose-demo">
+      <h2 class="section-title">Compositing Demo</h2>
 
+      <!-- 一组演示：用 CSS 变量传入 5 张图 -->
+      <div class="compose-stage"
+          style="
+            --bg:     url('assets/demo/000005_info_background.png');
+            --bgbox:  url('assets/demo/000005_info_background_annotated.png');
+            --obj:    url('assets/demo/000005_info_input.png');
+            --out:    url('assets/demo/000005_info_output.png');
+            --outbox: url('assets/demo/000005_info_output_annotated.png');
+            --dur: 12s; /* 可改：整段动画时长 */
+          ">
+        <!-- 左面板：bg -> bgbox -> output -->
+        <div class="compose-pane left">
+          <div class="compose-layer bg"></div>
+          <div class="compose-layer bgbox"></div>
+          <div class="compose-layer output"></div>
+        </div>
+
+        <!-- 右面板：bgbox -> object(左移淡出) -> outbox -->
+        <div class="compose-pane right">
+          <div class="compose-layer bgbox"></div>
+          <div class="compose-layer object"></div>
+          <div class="compose-layer outbox"></div>
+        </div>
+      </div>
+
+      <div class="compose-caption">
+        <span>Left: Background → ROI (bbox) → Final Output</span>
+        <span>Right: ROI → Object (slide&fade) → Output with bbox</span>
+      </div>
     </div>
   </section>
 </div>

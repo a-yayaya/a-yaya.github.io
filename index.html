@@ -59,7 +59,7 @@
   .ring .center{position:absolute; inset:0; display:grid; place-items:center; font-weight:800; font-size:28px}
   .ring .center small{display:block; color:var(--muted); font-weight:600; font-size:12px; margin-top:4px}
 
-  /* ====== 样例页 ====== */
+  /* ====== 样例页（可复用） ====== */
   .gallery{display:grid; gap:18px; grid-template-columns:repeat(2,1fr)}
   @media(min-width:900px){ .gallery{grid-template-columns:repeat(4,1fr)} }
   .thumb{width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:16px; border:1px solid var(--border); background:#0f172a}
@@ -71,12 +71,6 @@
   .dot:hover{transform:scale(1.12)}
 
   /* 小标题装饰 */
-  .cap{display:flex; align-items:center; gap:10px; margin-bottom:16px}
-  .cap:before{content:""; width:6px; height:24px; border-radius:6px;
-    background:linear-gradient(180deg, var(--pink), var(--violet))}
-
-  /* ===== full-bleed ===== */
-  .fullbleed { width:100%; max-width:1200px; margin:0 auto; padding:0 24px; }
   .section-title {
     display:flex; align-items:center; gap:10px; margin:8px 0 18px;
     font-size:28px; font-weight:800;
@@ -85,6 +79,7 @@
     content:""; width:8px; height:26px; border-radius:8px;
     background:linear-gradient(180deg,#fb72c3,#a78bfa);
   }
+  .fullbleed { width:100%; max-width:1200px; margin:0 auto; padding:0 24px; }
 
   /* ===== 普通 ticker 的基础样式（作为素材池存在） ===== */
   .ticker { position:relative; overflow:hidden; }
@@ -170,12 +165,6 @@
   .hero-buttons .btn:hover{ background:#111827; }
 
   .snap.hero-landing{ min-height:100vh; padding:0; margin:0; position:relative; isolation:isolate; overflow:hidden; z-index:0; }
-  .snap.hero-landing .hero-bg{
-    position:absolute; left:50%; top:50%;
-    width:100vw; height:100vh; transform:translate(-50%,-50%) scale(1.12);
-    object-fit:cover; filter:blur(8px) brightness(.85); z-index:0; pointer-events:none;
-  }
-  .snap.hero-landing .hero-content{ position:relative; z-index:1; padding:clamp(16px,2vw,32px); }
   .hero-logo{ width:88px; height:88px; border-radius:18px; display:inline-block; margin-bottom:16px; }
 
   /* ===== 悬停放大 ===== */
@@ -186,173 +175,136 @@
   }
 
   /* ===== 子弹流：隐藏素材轨道 + 轨道/弹体样式 ===== */
-/* 子弹流：隐藏素材轨道 + 固定容器高度 */
-.ticker.shoot .track{ display:none; }                 /* 素材池只用于克隆，不显示 */
-.ticker.shoot {
-  position: relative;
-  overflow: hidden;
-  height: var(--shoot-h, 260px);                      /* ← 有默认高度，JS 会实时更新 */
-}
-.ticker.shoot .lane {
-  position: relative;
-  width: 100%;
-  height: 100%;                                       /* ← 撑满 ticker，便于居中 */
-}
+  .ticker.shoot .track{ display:none; }  /* 素材池只用于克隆，不显示 */
+  .ticker.shoot { position: relative; overflow: hidden; height: var(--shoot-h, 260px); }
+  .ticker.shoot .lane { position: relative; width: 100%; height: 100%; }
+  .ticker.shoot .bolt {
+    position: absolute; top: 50%; left: 100%;
+    transform: translate3d(0,-50%,0); will-change: transform; backface-visibility: hidden;
+  }
+  .ticker.shoot .bolt img { display:block; width:100%; height:100%; object-fit:cover; }
+  .ticker.shoot:hover .bolt { animation-play-state: paused; }
+  @keyframes bullet {
+    from { transform: translate3d(0,-50%,0); }
+    to   { transform: translate3d(calc(-100vw - var(--w, 300px)),-50%,0); }
+  }
 
-/* 发射的“弹体” */
-.ticker.shoot .bolt {
-  position: absolute;
-  top: 50%; left: 100%;
-  transform: translate3d(0,-50%,0);
-  will-change: transform;
-  backface-visibility: hidden;
-}
-.ticker.shoot .bolt img {
-  display:block; width:100%; height:100%; object-fit:cover;
-}
+  /* ===== 全站固定背景：一张图 ===== */
+  body{ background:transparent; }
+  body::before{
+    content:""; position:fixed; inset:0; z-index:-1;
+    background-image:
+      linear-gradient(to top, rgba(10,10,20,0.85), rgba(10,10,20,0.15)),
+      url("assets/logo.png");
+    background-size:cover; background-position:center; background-repeat:no-repeat;
+  }
 
-/* 悬停暂停（可保留/可删） */
-.ticker.shoot:hover .bolt { animation-play-state: paused; }
+  /* ====== compose-demo（滑动版）命名空间：cd_* ====== */
+  .compose-demo{ max-width:1200px; margin:0 auto; padding:0 24px; }
+  .compose-stage{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .compose-pane{
+    position:relative; height: clamp(280px, 52vh, 420px);
+    border:1px solid var(--border); border-radius:16px; overflow:hidden;
+    background:#0f172a; box-shadow:var(--shadow);
+  }
+  .compose-layer{ position:absolute; inset:0; background-size:cover; background-position:center; background-repeat:no-repeat; opacity:0; transform:translateX(0); }
+  .compose-stage{ --dur:12s; }
 
-/* 从右侧飞过整个视口（距离 = 视口宽 + 自身宽） */
-@keyframes bullet {
-  from { transform: translate3d(0,-50%,0); }
-  to   { transform: translate3d(calc(-100vw - var(--w, 300px)),-50%,0); }
-}
+  .compose-pane.left  .bg     { background-image:var(--bg);     animation:cd_L_bg    var(--dur) ease-in-out infinite; }
+  .compose-pane.left  .bgbox  { background-image:var(--bgbox);  animation:cd_L_bgbox var(--dur) ease-in-out infinite; }
+  .compose-pane.left  .output { background-image:var(--out);    animation:cd_L_out   var(--dur) ease-in-out infinite; }
+  .compose-pane.right .bgbox  { background-image:var(--bgbox);  animation:cd_R_bgbox var(--dur) ease-in-out infinite; }
+  .compose-pane.right .object { background-image:var(--obj);    animation:cd_R_obj   var(--dur) ease-in-out infinite; }
+  .compose-pane.right .outbox { background-image:var(--outbox); animation:cd_R_outbx var(--dur) ease-in-out infinite; }
 
-/* 全站固定背景：一张大图 */
-html, body {
-  height: 100%;
-}
-body {
-  /* 你的主题文字颜色仍然按原来写 */
-  background: transparent;  /* 重要：让下面 ::before 负责真正的背景 */
-}
+  @keyframes cd_L_bg{0%{opacity:1}18%{opacity:1}28%{opacity:0}100%{opacity:0}}
+  @keyframes cd_L_bgbox{0%{opacity:0}18%{opacity:0}22%{opacity:1}42%{opacity:1}52%{opacity:0}100%{opacity:0}}
+  @keyframes cd_L_out{0%{opacity:0}48%{opacity:0}60%{opacity:1}90%{opacity:1}100%{opacity:0}}
+  @keyframes cd_R_bgbox{
+    0%{opacity:0;transform:translateX(24px)} 10%{opacity:1;transform:translateX(0)}
+    28%{opacity:1} 34%{opacity:0} 100%{opacity:0}
+  }
+  @keyframes cd_R_obj{
+    0%{opacity:0;transform:translateX(24px)} 26%{opacity:0;transform:translateX(24px)}
+    32%{opacity:1;transform:translateX(0)} 48%{opacity:1;transform:translateX(0)}
+    60%{opacity:0;transform:translateX(-120%)} 100%{opacity:0;transform:translateX(-120%)}
+  }
+  @keyframes cd_R_outbx{
+    0%{opacity:0;transform:translateX(24px)} 58%{opacity:0;transform:translateX(24px)}
+    68%{opacity:1;transform:translateX(0)} 90%{opacity:1} 100%{opacity:0}
+  }
+  .compose-caption{ display:flex; justify-content:space-between; align-items:center; font-weight:700; margin:10px 2px 0; color:var(--muted); font-size:.92rem; }
 
-/* 背景图层：固定在视口，铺满，所有页面共享 */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;              /* 永远在内容后面 */
-  background-image:
-    /* 可选：在最上面叠一层由下到上变暗的渐变，便于读标题 */
-    linear-gradient(to top, rgba(10,10,20,0.85), rgba(10,10,20,0.15)),
-    url("assets/logo.png");   /* ← 你的拼好的大图 */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  filter: none;             /* 想要更柔和可以加 blur/brightness */
-}
+  /* ====== s1：四步淡入版 命名空间：s1_* ====== */
+  .s1-stage{ --dur:12s; display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .s1-pane{
+    position:relative; height:clamp(280px,52vh,420px);
+    border:1px solid var(--border); border-radius:16px; overflow:hidden;
+    background:#0f172a; box-shadow:var(--shadow);
+  }
+  .s1-layer{ position:absolute; inset:0; background-size:cover; background-position:center; opacity:0; will-change:opacity; }
 
-/* 你已有的内容容器要有层级，盖在背景上 */
-.snap-container, section.snap, .main-content {
-  position: relative;
-  z-index: 0;
-}
+  .s1-pane.left  .bg    { background-image:var(--bg);    animation:s1_L_bg    var(--dur) ease-in-out infinite; }
+  .s1-pane.left  .bgbox { background-image:var(--bgbox); animation:s1_L_bgbox var(--dur) ease-in-out infinite; }
+  .s1-pane.left  .out   { background-image:var(--out);   animation:s1_L_out   var(--dur) ease-in-out infinite; }
 
+  .s1-pane.right .sub         { background-image:var(--sub);   animation:s1_R_sub    var(--dur) ease-in-out infinite; }
+  .s1-pane.right .bgboxghost  { background-image:var(--bgbox); animation:s1_R_bgbox  var(--dur) ease-in-out infinite; }
+  .s1-pane.right .outbx       { background-image:var(--outbx); animation:s1_R_outbx  var(--dur) ease-in-out infinite; }
 
-/* === 两格演示：容器与面板 === */
-.compose-demo { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-.compose-stage {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-.compose-pane {
-  position: relative;
-  height: clamp(280px, 52vh, 420px);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  overflow: hidden;
-  background: #0f172a;
-  box-shadow: var(--shadow);
-}
+  @keyframes s1_L_bg{0%{opacity:0}10%{opacity:1}30%{opacity:1}34%{opacity:0}100%{opacity:0}}
+  @keyframes s1_L_bgbox{0%{opacity:0}36%{opacity:0}42%{opacity:1}54%{opacity:1}58%{opacity:0}100%{opacity:0}}
+  @keyframes s1_L_out{0%{opacity:0}58%{opacity:1}90%{opacity:1}100%{opacity:0}}
+  @keyframes s1_R_sub{0%{opacity:1}30%{opacity:1}34%{opacity:0}100%{opacity:0}}
+  @keyframes s1_R_bgbox{0%{opacity:0}26%{opacity:0}30%{opacity:1}36%{opacity:1}40%{opacity:0}100%{opacity:0}}
+  @keyframes s1_R_outbx{0%{opacity:0}70%{opacity:0}75%{opacity:1}95%{opacity:1}100%{opacity:0}}
+  .s1-caption{ display:flex; justify-content:space-between; color:var(--muted); font-weight:700; margin:10px 2px 0; font-size:.92rem; }
 
-/* 每一层都是一张背景图，按时间表控制透明度/位移 */
-.compose-layer {
-  position: absolute; inset: 0;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0; transform: translateX(0);
-}
+  /* ====== 单图位动画 oneanim（淡入、三列自适应、卡片限制尺寸） ====== */
+  .oneanim-grid{
+    display:grid; gap:16px;
+    grid-template-columns:repeat(3, minmax(0,1fr)); align-items:start;
+  }
+  @media (max-width: 900px){ .oneanim-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
+  @media (max-width: 640px){ .oneanim-grid{ grid-template-columns:1fr; } }
 
-/* 时间轴：总时长可用 --dur 控制，默认 12s 循环 */
-.compose-stage { --dur: 12s; }
+  .oneanim-item{ display:flex; flex-direction:column; gap:8px; align-items:center; }
 
-/* —— 左侧时间表：bg → bg+box → output —— */
-.left .bg      { background-image: var(--bg);     animation: L_bg var(--dur) ease-in-out infinite; }
-.left .bgbox   { background-image: var(--bgbox);  animation: L_bgbox var(--dur) ease-in-out infinite; }
-.left .output  { background-image: var(--out);    animation: L_out var(--dur) ease-in-out infinite; }
+  .oneanim-card{
+    --dur:12s;
+    position:relative;
+    width:100%; max-width:320px;            /* 控制每张卡片的最大尺寸 */
+    aspect-ratio:1/1;
+    border:1px solid var(--border); border-radius:16px; overflow:hidden;
+    background:#0f172a; box-shadow:var(--shadow);
+  }
+  @media (max-width:1200px){ .oneanim-card{ max-width:300px; } }
+  @media (max-width:900px){  .oneanim-card{ max-width:280px; } }
+  @media (max-width:640px){  .oneanim-card{ max-width:min(92vw,360px); } }
 
-/* —— 右侧时间表：bg+box → object → out+box —— */
-.right .bgbox  { background-image: var(--bgbox);  animation: R_bgbox var(--dur) ease-in-out infinite; }
-.right .object { background-image: var(--obj);    animation: R_obj var(--dur) ease-in-out infinite; }
-.right .outbox { background-image: var(--outbox); animation: R_outbox var(--dur) ease-in-out infinite; }
+  .oneanim-layer{
+    position:absolute; inset:0; background-size:cover; background-position:center; background-repeat:no-repeat;
+    opacity:0; will-change:opacity;
+  }
+  .oneanim-card .step1-sub  { background-image:var(--sub);   animation:oa_step1 var(--dur) ease-in-out infinite; }
+  .oneanim-card .step2-bg   { background-image:var(--bg);    animation:oa_step2 var(--dur) ease-in-out infinite; }
+  .oneanim-card .step3-box  { background-image:var(--bgbox); animation:oa_step3 var(--dur) ease-in-out infinite; }
+  .oneanim-card .step4-out  { background-image:var(--out);   animation:oa_step4 var(--dur) ease-in-out infinite; }
 
-/* ===== Keyframes：按百分比分镜头（可微调） ===== */
+/* 让每个步骤之间有重叠，避免空隙 */
+/* 让下一张图片提前开始显示，上一张延迟消失 */
+@keyframes oa_step1{0%{opacity:1}22%{opacity:1}28%{opacity:0}100%{opacity:0}}
+@keyframes oa_step2{0%{opacity:0}20%{opacity:0}25%{opacity:1}50%{opacity:1}56%{opacity:0}100%{opacity:0}}
+@keyframes oa_step3{0%{opacity:0}48%{opacity:0}53%{opacity:1}75%{opacity:1}81%{opacity:0}100%{opacity:0}}
+@keyframes oa_step4{0%{opacity:0}73%{opacity:0}78%{opacity:1}98%{opacity:1}100%{opacity:1}}
 
-/* 左：最开始显示 bg */
-@keyframes L_bg{
-  0%{opacity:1}
-  18%{opacity:1}
-  28%{opacity:0} /* 即将被 bgbox 取代 */
-  100%{opacity:0}
-}
-
-/* 左：把带框版本“左移替换”，实际上是淡入 */
-@keyframes L_bgbox{
-  0%{opacity:0}
-  18%{opacity:0}
-  22%{opacity:1}           /* 与右侧的“出现框”形成衔接 */
-  42%{opacity:1}
-  52%{opacity:0}           /* 准备切到 output */
-  100%{opacity:0}
-}
-
-/* 左：出现最终 output（在右侧“object 左移并淡出”期间切入） */
-@keyframes L_out{
-  0%{opacity:0}
-  48%{opacity:0}
-  60%{opacity:1}
-  90%{opacity:1}
-  100%{opacity:0}          /* 为下一轮循环 */
-}
-
-/* 右：先出现带框背景，给用户暗示插入位置 */
-@keyframes R_bgbox{
-  0%{opacity:0; transform:translateX(24px)}
-  10%{opacity:1; transform:translateX(0)}
-  28%{opacity:1}
-  34%{opacity:0}           /* 让位给 object */
-  100%{opacity:0}
-}
-
-/* 右：主体出现 → 向左移动同时变透明（模拟“移入合成”） */
-@keyframes R_obj{
-  0%{opacity:0; transform:translateX(24px)}
-  26%{opacity:0; transform:translateX(24px)}
-  32%{opacity:1; transform:translateX(0)}   /* 进入右格 */
-  48%{opacity:1; transform:translateX(0)}
-  60%{opacity:0; transform:translateX(-120%)} /* 左移并淡出 */
-  100%{opacity:0; transform:translateX(-120%)}
-}
-
-/* 右：最后出现带框的输出结果 */
-@keyframes R_outbox{
-  0%{opacity:0; transform:translateX(24px)}
-  58%{opacity:0; transform:translateX(24px)}
-  68%{opacity:1; transform:translateX(0)}
-  90%{opacity:1}
-  100%{opacity:0}
-}
-
-/* 小标题 */
-.compose-caption{
-  display:flex; justify-content:space-between; align-items:center;
-  font-weight:700; margin:10px 2px 0; color:var(--muted);
-  font-size:.92rem;
+  .oneanim-caption{ margin:0; text-align:center; color:var(--muted); font-weight:600; font-size:.92rem; }
+  /* caption 高亮 */
+  .oneanim-caption { margin:0; text-align:center; color:var(--muted); font-weight:600; font-size:.92rem; }
+  .oneanim-caption span{ transition:color .25s ease, text-shadow .25s ease; }
+  .oneanim-caption span.active{
+    color: var(--blue);
+    text-shadow: 0 0 10px rgba(96,165,250,.35);
 }
 
 </style>
@@ -369,7 +321,6 @@ body::before {
 <div class="snap-container" id="snapper">
   <!-- Hero Section -->
   <section class="snap hero-landing" id="home">
-    <!-- <img class="hero-bg" src="assets/logo.png" alt="Hero" /> -->
     <div class="hero-content">
       <img src="assets/logo.png" alt="Logo" class="hero-logo">
       <h1>ConsistCompose Dataset</h1>
@@ -387,7 +338,7 @@ body::before {
   <section class="snap" id="stats">
     <div class="inner">
       <div class="card" style="padding:26px">
-        <div class="cap"><h2>Data Statistics</h2></div>
+        <h2 class="section-title">Data Statistics</h2>
         <div class="stats-grid">
           <div class="card stat-card">
             <div class="stat-title" style="color:#fb72c3">Imagination</div>
@@ -406,100 +357,159 @@ body::before {
     </div>
   </section>
 
-  <!-- Page 3: IMAGINATION -->
-  <section class="snap" id="imagination">
+
+  <!-- Page 4: Single Image Animation (x6) 三列自适应 -->
+  <section class="snap" id="single-anim-grid">
     <div class="fullbleed">
-      <h2 class="section-title">Imagination</h2>
+      <h2 class="section-title">Single Reference</h2>
+      <div class="oneanim-grid">
 
-      <!-- 改为 shoot：用 .tile 作为“子弹单元” -->
-      <div class="ticker shoot" data-mode="shoot" data-speed="160" data-gap="22">
-        <div class="track">
-          <div class="tile" style="--y:-18px"><img src="assets/samples/sample1.jpg" alt=""></div>
-          <div class="tile" style="--y:-60px"><img src="assets/samples/sample2.jpg" alt=""></div>
-          <div class="tile" style="--y:40px"><img src="assets/samples/sample3.jpg" alt=""></div>
-          <div class="tile" style="--y:-10px"><img src="assets/samples/sample4.jpg" alt=""></div>
-          <div class="tile" style="--y:60px"><img src="assets/samples/sample5.jpg" alt=""></div>
-          <div class="tile" style="--y:-28px"><img src="assets/samples/sample6.jpg" alt=""></div>
-          <div class="tile" style="--y:36px"><img src="assets/samples/sample7.jpg" alt=""></div>
-          <div class="tile" style="--y:-52px"><img src="assets/samples/sample8.jpg" alt=""></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Page 4: MULTI-REFERENCE（两行都改为 shoot，用 bundle 作为单元） -->
-  <section class="snap" id="multiref">
-    <div class="fullbleed">
-      <h2 class="section-title">Multi-Reference</h2>
-
-      <!-- 行 1：左→右（速度可自行调高一点） -->
-      <div class="ticker row-gap shoot" data-mode="shoot" data-speed="220" data-gap="24">
-        <div class="track">
-          <div class="bundle">
-            <div class="cell"><img src="assets/mr/group1/000047_background.png" alt=""></div>
-            <div class="cell"><img src="assets/mr/group1/000047_input.png"      alt=""></div>
-            <div class="cell"><img src="assets/mr/group1/000047_output.png"     alt=""></div>
-          </div>
-          <div class="bundle">
-            <div class="cell"><img src="assets/mr/group2/ref1.jpg" alt=""></div>
-            <div class="cell"><img src="assets/mr/group2/ref2.jpg" alt=""></div>
-            <div class="cell"><img src="assets/mr/group2/out.jpg"  alt=""></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 行 2：右→左（也可以 shoot；如果想反向，可在 JS 里加 direction 支持） -->
-      <div class="ticker row-gap shoot" data-mode="shoot" data-speed="200" data-gap="24">
-        <div class="track">
-          <div class="bundle">
-            <div class="cell"><img src="assets/mr/group3/ref1.jpg" alt=""></div>
-            <div class="cell"><img src="assets/mr/group3/ref2.jpg" alt=""></div>
-            <div class="cell"><img src="assets/mr/group3/out.jpg"  alt=""></div>
-          </div>
-          <div class="bundle">
-            <div class="cell"><img src="assets/mr/group4/ref1.jpg" alt=""></div>
-            <div class="cell"><img src="assets/mr/group4/ref2.jpg" alt=""></div>
-            <div class="cell"><img src="assets/mr/group4/out.jpg"  alt=""></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-  <section class="snap" id="compose-demo">
-    <div class="fullbleed compose-demo">
-      <h2 class="section-title">Compositing Demo</h2>
-
-      <!-- 一组演示：用 CSS 变量传入 5 张图 -->
-      <div class="compose-stage"
+        <!-- 用 oneanim-item 把卡片和说明绑在一起；复制 6 次，按需替换 URL -->
+        <div class="oneanim-item">
+          <div class="oneanim-card" 
           style="
-            --bg:     url('assets/demo/000005_info_background.png');
-            --bgbox:  url('assets/demo/000005_info_background_annotated.png');
-            --obj:    url('assets/demo/000005_info_input.png');
-            --out:    url('assets/demo/000005_info_output.png');
-            --outbox: url('assets/demo/000005_info_output_annotated.png');
-            --dur: 12s; /* 可改：整段动画时长 */
-          ">
-        <!-- 左面板：bg -> bgbox -> output -->
-        <div class="compose-pane left">
-          <div class="compose-layer bg"></div>
-          <div class="compose-layer bgbox"></div>
-          <div class="compose-layer output"></div>
+            --sub:url('assets/demo/000098_info_input.png'); 
+             --bg:url('assets/demo/000098_info_background.png'); 
+          --bgbox:url('assets/demo/000098_info_background_annotated.png'); 
+            --out:url('assets/demo/000098_info_output.png'); 
+          --dur:8s;">
+            <div class="oneanim-layer step1-sub"></div>
+            <div class="oneanim-layer step2-bg"></div>
+            <div class="oneanim-layer step3-box"></div>
+            <div class="oneanim-layer step4-out"></div>
+          </div>
+            <div class="oneanim-caption">
+            <span data-step="1">Subject</span> &nbsp;→&nbsp;
+            <span data-step="2">Background</span> &nbsp;→&nbsp;
+            <span data-step="3">ROI</span> &nbsp;→&nbsp;
+            <span data-step="4">Output</span>
+          </div>
         </div>
 
-        <!-- 右面板：bgbox -> object(左移淡出) -> outbox -->
-        <div class="compose-pane right">
-          <div class="compose-layer bgbox"></div>
-          <div class="compose-layer object"></div>
-          <div class="compose-layer outbox"></div>
+        <div class="oneanim-item">
+          <div class="oneanim-card" 
+          style="
+            --sub:url('assets/demo/000345_info_input.png'); 
+             --bg:url('assets/demo/000345_info_background.png'); 
+          --bgbox:url('assets/demo/000345_info_background_annotated.png'); 
+            --out:url('assets/demo/000345_info_output.png'); 
+          --dur:8s;">
+            <div class="oneanim-layer step1-sub"></div>
+            <div class="oneanim-layer step2-bg"></div>
+            <div class="oneanim-layer step3-box"></div>
+            <div class="oneanim-layer step4-out"></div>
+          </div>
+            <div class="oneanim-caption">
+            <span data-step="1">Subject</span> &nbsp;→&nbsp;
+            <span data-step="2">Background</span> &nbsp;→&nbsp;
+            <span data-step="3">ROI</span> &nbsp;→&nbsp;
+            <span data-step="4">Output</span>
+          </div>
         </div>
-      </div>
 
-      <div class="compose-caption">
-        <span>Left: Background → ROI (bbox) → Final Output</span>
-        <span>Right: ROI → Object (slide&fade) → Output with bbox</span>
+        <div class="oneanim-item">
+          <div class="oneanim-card" 
+          style="
+            --sub:url('assets/demo/000350_info_input.png'); 
+             --bg:url('assets/demo/000350_info_background.png'); 
+          --bgbox:url('assets/demo/000350_info_background_annotated.png'); 
+            --out:url('assets/demo/000350_info_output.png'); 
+          --dur:8s;">
+            <div class="oneanim-layer step1-sub"></div>
+            <div class="oneanim-layer step2-bg"></div>
+            <div class="oneanim-layer step3-box"></div>
+            <div class="oneanim-layer step4-out"></div>
+          </div>
+            <div class="oneanim-caption">
+            <span data-step="1">Subject</span> &nbsp;→&nbsp;
+            <span data-step="2">Background</span> &nbsp;→&nbsp;
+            <span data-step="3">ROI</span> &nbsp;→&nbsp;
+            <span data-step="4">Output</span>
+          </div>
+        </div>
+
+        <div class="oneanim-item">
+          <div class="oneanim-card" 
+          style="
+            --sub:url('assets/demo/000067_info_input.png'); 
+             --bg:url('assets/demo/000067_info_background.png'); 
+          --bgbox:url('assets/demo/000067_info_background_annotated.png'); 
+            --out:url('assets/demo/000067_info_output.png'); 
+          --dur:8s;">
+            <div class="oneanim-layer step1-sub"></div>
+            <div class="oneanim-layer step2-bg"></div>
+            <div class="oneanim-layer step3-box"></div>
+            <div class="oneanim-layer step4-out"></div>
+          </div>
+          <div class="oneanim-caption">
+            <span data-step="1">Subject</span> &nbsp;→&nbsp;
+            <span data-step="2">Background</span> &nbsp;→&nbsp;
+            <span data-step="3">ROI</span> &nbsp;→&nbsp;
+            <span data-step="4">Output</span>
+          </div>
+        </div>
+
+        <div class="oneanim-item">
+          <div class="oneanim-card" 
+          style="
+            --sub:url('assets/demo/000072_info_input.png'); 
+             --bg:url('assets/demo/000072_info_background.png'); 
+          --bgbox:url('assets/demo/000072_info_background_annotated.png'); 
+            --out:url('assets/demo/000072_info_output.png'); 
+          --dur:8s;">
+            <div class="oneanim-layer step1-sub"></div>
+            <div class="oneanim-layer step2-bg"></div>
+            <div class="oneanim-layer step3-box"></div>
+            <div class="oneanim-layer step4-out"></div>
+          </div>
+          <div class="oneanim-caption">
+            <span data-step="1">Subject</span> &nbsp;→&nbsp;
+            <span data-step="2">Background</span> &nbsp;→&nbsp;
+            <span data-step="3">ROI</span> &nbsp;→&nbsp;
+            <span data-step="4">Output</span>
+          </div>
+
+        </div>
+
+        <div class="oneanim-item">
+          <div class="oneanim-card" 
+          style="
+            --sub:url('assets/demo/000012_info_input.png'); 
+             --bg:url('assets/demo/000012_info_background.png'); 
+          --bgbox:url('assets/demo/000012_info_background_annotated.png'); 
+            --out:url('assets/demo/000012_info_output.png'); 
+          --dur:8s;">
+            <div class="oneanim-layer step1-sub"></div>
+            <div class="oneanim-layer step2-bg"></div>
+            <div class="oneanim-layer step3-box"></div>
+            <div class="oneanim-layer step4-out"></div>
+          </div>
+          <div class="oneanim-caption">
+            <span data-step="1">Subject</span> &nbsp;→&nbsp;
+            <span data-step="2">Background</span> &nbsp;→&nbsp;
+            <span data-step="3">ROI</span> &nbsp;→&nbsp;
+            <span data-step="4">Output</span>
+          </div>
+
+        </div>
+
       </div>
     </div>
   </section>
+
+<section class="snap" id="multiref">
+  <div class="fullbleed">
+    <h2 class="section-title">Single Reference Image Wall</h2>
+
+    <!-- 3 行射流，素材由 JS 自动注入 -->
+    <div class="ticker row-gap shoot demo-shoot" data-speed="220" data-gap="24"></div>
+    <div class="ticker row-gap shoot demo-shoot" data-speed="210" data-gap="24"></div>
+    <div class="ticker row-gap shoot demo-shoot" data-speed="200" data-gap="24"></div>
+  </div>
+</section>
+
+
+
 </div>
 
 <!-- 右侧分页点 -->
@@ -603,26 +613,14 @@ document.getElementById('lb-close').addEventListener('click', closeLB);
 lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLB(); });
 window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeLB(); });
 
-/* 委托给整个文档：点击任何 lane 里的图片都能打开 Lightbox */
-document.addEventListener('click', (e)=>{
-  const img = e.target.closest('.lane img');
-  if(img) openLB(img.src);
-});
-
 /* ===== 3) 子弹式滚动（通用：支持 .bundle 或 .tile 作为单元） ===== */
 function initShootTicker(ticker){
   const track = ticker.querySelector('.track');
+  const lane = document.createElement('div'); lane.className='lane'; ticker.appendChild(lane);
 
-  // 发射轨道
-  const lane = document.createElement('div');
-  lane.className = 'lane';
-  ticker.appendChild(lane);
+  const SPEED = +(ticker.dataset.speed || 180);
+  const GAP   = +(ticker.dataset.gap   || 22);
 
-  // 参数
-  const SPEED = +(ticker.dataset.speed || 180); // px/s，仅用于动画时长
-  const GAP   = +(ticker.dataset.gap   || 22);  // 固定间隔（像素）
-
-  // 素材单元：优先 bundle，其次 tile，最后直接子元素
   let units = track ? Array.from(track.querySelectorAll('.bundle')) : [];
   if(!units.length && track) units = Array.from(track.querySelectorAll('.tile'));
   if(!units.length && track) units = Array.from(track.children || []);
@@ -631,50 +629,39 @@ function initShootTicker(ticker){
   // 先探针测高度，撑开容器
   (function setInitialHeight(){
     const probe = units[0].cloneNode(true);
-    probe.style.visibility = 'hidden';
-    probe.style.position = 'absolute';
-    probe.style.left = '-9999px';
+    probe.style.visibility='hidden'; probe.style.position='absolute'; probe.style.left='-9999px';
     ticker.appendChild(probe);
     const h = probe.offsetHeight || probe.getBoundingClientRect().height || 260;
     ticker.style.setProperty('--shoot-h', h + 'px');
     probe.remove();
   })();
 
-  let idx = 0;
-  let paused = false;
-  let destroyed = false;
+  let idx = 0, paused = false, destroyed = false;
 
-  // 是否满足“固定间隔 GAP”后可以发射下一发：
   function readyToSpawn(){
     const last = lane.querySelector('.bolt:last-of-type');
-    if(!last) return true; // 没有在飞的子弹，立刻发
+    if(!last) return true;
     const lastRect = last.getBoundingClientRect();
     const tRect = ticker.getBoundingClientRect();
-    const space = tRect.right - lastRect.right; // 上一发右边缘到容器右边缘的空间
+    const space = tRect.right - lastRect.right;
     return space >= GAP;
   }
 
   function spawn(){
     const node = units[idx++ % units.length].cloneNode(true);
-    node.classList.add('bolt');
-    lane.appendChild(node);
+    node.classList.add('bolt'); lane.appendChild(node);
 
     requestAnimationFrame(()=>{
       const w = node.offsetWidth || 260;
-      const h = node.offsetHeight || 260;
-      ticker.style.setProperty('--shoot-h', h + 'px');
+      const distance = ticker.clientWidth + w;
+      const dur = distance / SPEED;
       node.style.setProperty('--w', w + 'px');
-
-      const distance = ticker.clientWidth + w;   // 需要飞过的距离
-      const dur = distance / SPEED;              // 动画时长(s)
-
       node.style.animation = `bullet ${dur}s linear forwards`;
       node.addEventListener('animationend', ()=> node.remove());
       if (paused) node.style.animationPlayState = 'paused';
     });
   }
 
-  // 主循环：按帧检查距离，满足就发射；暂停时只不发射
   function loop(){
     if (!destroyed){
       if (!paused && readyToSpawn()) spawn();
@@ -683,23 +670,164 @@ function initShootTicker(ticker){
   }
   loop();
 
-  // 悬停暂停/恢复当前全部子弹（空间间隔由 loop 继续保证）
   ticker.addEventListener('mouseenter', ()=>{
-    paused = true;
-    lane.querySelectorAll('.bolt').forEach(b=> b.style.animationPlayState = 'paused');
+    paused = true; lane.querySelectorAll('.bolt').forEach(b=> b.style.animationPlayState='paused');
   });
   ticker.addEventListener('mouseleave', ()=>{
-    paused = false;
-    lane.querySelectorAll('.bolt').forEach(b=> b.style.animationPlayState = 'running');
+    paused = false; lane.querySelectorAll('.bolt').forEach(b=> b.style.animationPlayState='running');
   });
 
   return ()=>{ destroyed = true; };
 }
 
+document.addEventListener('click', (e) => {
+    const img = e.target.closest('.lane img, .bundle img, .tile img');
+    if (img) {
+      e.preventDefault();
+      openLB(img.src);
+    }
+});
+// document.querySelectorAll('.ticker[data-mode="shoot"]').forEach(initShootTicker);
+/* ===== 4) 单图位动画：文字高亮与动画同步 ===== */
+(function initOneAnimCaptions(){
+  // 读取 oneanim-card 的 --dur（秒）
+  const getDurSec = (card)=>{
+    const cs = getComputedStyle(card);
+    // 变量写在 style 里时，必须读取到具体值（秒）——这里默认 12s
+    let dur = cs.getPropertyValue('--dur').trim() || '12s';
+    // 如果没取到 var(--dur)，再尝试读取动画时长（兼容性兜底）
+    if(!dur || dur === '0s'){
+      // 从任意一层动画上抓一个时长
+      const layer = card.querySelector('.oneanim-layer');
+      if(layer){
+        const a = getComputedStyle(layer).animationDuration;
+        if(a && a.endsWith('s')) dur = a;
+      }
+    }
+    const n = parseFloat(dur);
+    return isNaN(n) ? 12 : n;
+  };
 
+  // 自动把纯文本 caption 包装成 4 个 span（如果用户没手动写 span）
+  document.querySelectorAll('.oneanim-item .oneanim-caption').forEach(cap=>{
+    if(!cap.querySelector('span')){
+      const txt = cap.textContent;
+      const parts = txt.split('→').map(s=>s.trim());
+      if(parts.length === 4){
+        cap.innerHTML =
+          `<span data-step="1">${parts[0]}</span> &nbsp;→&nbsp; `+
+          `<span data-step="2">${parts[1]}</span> &nbsp;→&nbsp; `+
+          `<span data-step="3">${parts[2]}</span> &nbsp;→&nbsp; `+
+          `<span data-step="4">${parts[3]}</span>`;
+      }
+    }
+  });
 
-// 初始化所有 shoot ticker
-document.querySelectorAll('.ticker[data-mode="shoot"]').forEach(initShootTicker);
+  // 根据你 CSS 的四段时间线（约等分），轮流高亮 1→2→3→4
+  document.querySelectorAll('.oneanim-item').forEach(item=>{
+    const card = item.querySelector('.oneanim-card');
+    const cap  = item.querySelector('.oneanim-caption');
+    if(!card || !cap) return;
+
+    const spans = cap.querySelectorAll('span[data-step]');
+    if(spans.length !== 4) return;
+
+    const dur = getDurSec(card);        // 总时长（秒），默认 12
+    const stepDur = dur / 4;            // 简单等分 4 步
+    let step = 1;
+
+    const highlight = (s)=>{
+      spans.forEach(el=> el.classList.toggle('active', +el.dataset.step === s));
+    };
+
+    // 立即根据当前时间对齐一步（避免初始空窗）
+    highlight(step);
+
+    // 循环定时器：每 stepDur 秒切到下一步
+    setInterval(()=>{
+      step = (step % 4) + 1;  // 1→2→3→4→1
+      highlight(step);
+    }, stepDur * 1000);
+  });
+})();
+
+/* ===== Build demo bundles for Multi‑Reference (3 rows) ===== */
+
+/** 这里列出你有的 demo id（5 张图为一组）。想加就往里写 */
+const DEMO_IDS = [
+"000005",
+"000012",
+"000035",
+"000039",
+"000040",
+"000050",
+"000052",
+"000058",
+"000061",
+"000067",
+"000072",
+"000079",
+"000080",
+"000081",
+"000082",
+"000095",
+"000098",
+"000099",
+"000105",
+"000107",
+"000112",
+"000133",
+"000136",
+"000137",
+"000145",
+"000146",
+"000164",
+"000185",
+"000304",
+"000311",
+"000314",
+"000315",
+"000345",
+"000350"
+];
+
+/** 根据 id 生成 5 张图的 bundle（背景、框、主体、输出、输出+框） */
+function createBundleNode(id){
+  const wrap = document.createElement('div');
+  wrap.className = 'bundle';
+  wrap.innerHTML = `
+    <div class="cell"><img src="assets/demo/${id}_info_input.png"                  alt="${id} input"></div>
+    <div class="cell"><img src="assets/demo/${id}_info_background.png"             alt="${id} background"></div>
+    <div class="cell"><img src="assets/demo/${id}_info_background_annotated.png"   alt="${id} background annotated"></div>
+    <div class="cell"><img src="assets/demo/${id}_info_output.png"                 alt="${id} output"></div>
+    <div class="cell"><img src="assets/demo/${id}_info_output_annotated.png"       alt="${id} output annotated"></div>
+  `;
+  return wrap;
+}
+
+/** 把 DEMO_IDS 按轮循分配到 3 行，注入为每行的隐藏 .track 素材池 */
+(function buildMultiRefTracks(){
+  const rows = Array.from(document.querySelectorAll('.ticker.demo-shoot'));
+  if(!rows.length) return;
+
+  // 给每一行创建 .track 容器，并轮流塞入 bundle
+  rows.forEach(row => {
+    const track = document.createElement('div');
+    track.className = 'track';
+    row.appendChild(track);
+  });
+
+  DEMO_IDS.forEach((id, i) => {
+    const row = rows[i % rows.length];      // 轮循到第 i 行
+    const track = row.querySelector('.track');
+    track.appendChild(createBundleNode(id));
+  });
+
+  // 给这些 ticker 标注 data-mode="shoot"，以便后面的初始化逻辑识别
+  rows.forEach(row => row.dataset.mode = 'shoot');
+  rows.forEach(initShootTicker);
+})();
+
 
 </script>
 </body>

@@ -306,7 +306,11 @@
     color: var(--blue);
     text-shadow: 0 0 10px rgba(96,165,250,.35);
 }
-
+/* 专门给第 5 页的四联图 bundle 改背景色 */
+#multiref-x4 .bundle {
+  background: #1e293b;  /* 比 #0f172a 稍微亮一点 */
+  border: 1px solid #475569;  /* 给一点描边，增强分隔 */
+}
 </style>
 </head>
 
@@ -358,7 +362,7 @@
   </section>
 
 
-  <!-- Page 4: Single Image Animation (x6) 三列自适应 -->
+  <!-- Page: Single Image Animation (x6) 三列自适应 -->
   <section class="snap" id="single-anim-grid">
     <div class="fullbleed">
       <h2 class="section-title">Single Reference</h2>
@@ -368,10 +372,10 @@
         <div class="oneanim-item">
           <div class="oneanim-card" 
           style="
-            --sub:url('assets/demo/000098_info_input.png'); 
-             --bg:url('assets/demo/000098_info_background.png'); 
-          --bgbox:url('assets/demo/000098_info_background_annotated.png'); 
-            --out:url('assets/demo/000098_info_output.png'); 
+            --sub:url('assets/single_ref/000098_info_input.jpg'); 
+             --bg:url('assets/single_ref/000098_info_background.jpg'); 
+          --bgbox:url('assets/single_ref/000098_info_background_annotated.jpg'); 
+            --out:url('assets/single_ref/000098_info_output.jpg'); 
           --dur:8s;">
             <div class="oneanim-layer step1-sub"></div>
             <div class="oneanim-layer step2-bg"></div>
@@ -389,10 +393,10 @@
         <div class="oneanim-item">
           <div class="oneanim-card" 
           style="
-            --sub:url('assets/demo/000345_info_input.png'); 
-             --bg:url('assets/demo/000345_info_background.png'); 
-          --bgbox:url('assets/demo/000345_info_background_annotated.png'); 
-            --out:url('assets/demo/000345_info_output.png'); 
+            --sub:url('assets/single_ref/000345_info_input.jpg'); 
+             --bg:url('assets/single_ref/000345_info_background.jpg'); 
+          --bgbox:url('assets/single_ref/000345_info_background_annotated.jpg'); 
+            --out:url('assets/single_ref/000345_info_output.jpg'); 
           --dur:8s;">
             <div class="oneanim-layer step1-sub"></div>
             <div class="oneanim-layer step2-bg"></div>
@@ -410,10 +414,10 @@
         <div class="oneanim-item">
           <div class="oneanim-card" 
           style="
-            --sub:url('assets/demo/000350_info_input.png'); 
-             --bg:url('assets/demo/000350_info_background.png'); 
-          --bgbox:url('assets/demo/000350_info_background_annotated.png'); 
-            --out:url('assets/demo/000350_info_output.png'); 
+            --sub:url('assets/single_ref/000350_info_input.jpg'); 
+             --bg:url('assets/single_ref/000350_info_background.jpg'); 
+          --bgbox:url('assets/single_ref/000350_info_background_annotated.jpg'); 
+            --out:url('assets/single_ref/000350_info_output.jpg'); 
           --dur:8s;">
             <div class="oneanim-layer step1-sub"></div>
             <div class="oneanim-layer step2-bg"></div>
@@ -431,10 +435,10 @@
         <div class="oneanim-item">
           <div class="oneanim-card" 
           style="
-            --sub:url('assets/demo/000067_info_input.png'); 
-             --bg:url('assets/demo/000067_info_background.png'); 
-          --bgbox:url('assets/demo/000067_info_background_annotated.png'); 
-            --out:url('assets/demo/000067_info_output.png'); 
+            --sub:url('assets/single_ref/000067_info_input.jpg'); 
+             --bg:url('assets/single_ref/000067_info_background.jpg'); 
+          --bgbox:url('assets/single_ref/000067_info_background_annotated.jpg'); 
+            --out:url('assets/single_ref/000067_info_output.jpg'); 
           --dur:8s;">
             <div class="oneanim-layer step1-sub"></div>
             <div class="oneanim-layer step2-bg"></div>
@@ -452,10 +456,10 @@
         <div class="oneanim-item">
           <div class="oneanim-card" 
           style="
-            --sub:url('assets/demo/000072_info_input.png'); 
-             --bg:url('assets/demo/000072_info_background.png'); 
-          --bgbox:url('assets/demo/000072_info_background_annotated.png'); 
-            --out:url('assets/demo/000072_info_output.png'); 
+            --sub:url('assets/single_ref/000072_info_input.jpg'); 
+             --bg:url('assets/single_ref/000072_info_background.jpg'); 
+          --bgbox:url('assets/single_ref/000072_info_background_annotated.jpg'); 
+            --out:url('assets/single_ref/000072_info_output.jpg'); 
           --dur:8s;">
             <div class="oneanim-layer step1-sub"></div>
             <div class="oneanim-layer step2-bg"></div>
@@ -474,10 +478,10 @@
         <div class="oneanim-item">
           <div class="oneanim-card" 
           style="
-            --sub:url('assets/demo/000012_info_input.png'); 
-             --bg:url('assets/demo/000012_info_background.png'); 
-          --bgbox:url('assets/demo/000012_info_background_annotated.png'); 
-            --out:url('assets/demo/000012_info_output.png'); 
+            --sub:url('assets/single_ref/000012_info_input.jpg'); 
+             --bg:url('assets/single_ref/000012_info_background.jpg'); 
+          --bgbox:url('assets/single_ref/000012_info_background_annotated.jpg'); 
+            --out:url('assets/single_ref/000012_info_output.jpg'); 
           --dur:8s;">
             <div class="oneanim-layer step1-sub"></div>
             <div class="oneanim-layer step2-bg"></div>
@@ -507,6 +511,18 @@
     <div class="ticker row-gap shoot demo-shoot" data-speed="200" data-gap="24"></div>
   </div>
 </section>
+<!-- Page 5: Four-Image Wall -->
+<section class="snap" id="multiref-x4">
+  <div class="fullbleed">
+    <h2 class="section-title">Multi-Reference Image Wall</h2>
+
+    <!-- 3 行射流，素材由 JS 自动注入 -->
+    <div class="ticker row-gap shoot demo-shoot4" data-speed="220" data-gap="24"></div>
+    <div class="ticker row-gap shoot demo-shoot4" data-speed="210" data-gap="24"></div>
+    <div class="ticker row-gap shoot demo-shoot4" data-speed="200" data-gap="24"></div>
+  </div>
+</section>
+
 
 
 
@@ -796,11 +812,9 @@ function createBundleNode(id){
   const wrap = document.createElement('div');
   wrap.className = 'bundle';
   wrap.innerHTML = `
-    <div class="cell"><img src="assets/demo/${id}_info_input.png"                  alt="${id} input"></div>
-    <div class="cell"><img src="assets/demo/${id}_info_background.png"             alt="${id} background"></div>
-    <div class="cell"><img src="assets/demo/${id}_info_background_annotated.png"   alt="${id} background annotated"></div>
-    <div class="cell"><img src="assets/demo/${id}_info_output.png"                 alt="${id} output"></div>
-    <div class="cell"><img src="assets/demo/${id}_info_output_annotated.png"       alt="${id} output annotated"></div>
+    <div class="cell"><img src="assets/single_ref/${id}_info_input.jpg"                  alt="${id} input"></div>
+    <div class="cell"><img src="assets/single_ref/${id}_info_background_annotated.jpg"   alt="${id} background annotated"></div>
+    <div class="cell"><img src="assets/single_ref/${id}_info_output.jpg"                 alt="${id} output"></div>
   `;
   return wrap;
 }
@@ -828,6 +842,61 @@ function createBundleNode(id){
   rows.forEach(initShootTicker);
 })();
 
+/** 4 图版的 bundle（在 3 图基础上多加一张 background 原图） */
+
+const DEMO_IDS_X4 = [
+'000081',
+'000088',
+'000098',
+'000099',
+'000115',
+'000120',
+'000125',
+'000142',
+'000158',
+'000164',
+'000171',
+'000172',
+'000188',
+'000197',
+'000208',
+'000217',
+'000219',
+  // 按需往下加
+];
+
+/** 生成 4 张图的 bundle */
+function createBundleNode4(id){
+  const wrap = document.createElement('div');
+  wrap.className = 'bundle';
+  wrap.innerHTML = `
+    <div class="cell"><img src="assets/mult_ref/${id}_img1.jpg"               alt="${id} input"></div>
+    <div class="cell"><img src="assets/mult_ref/${id}_img2.jpg"          alt="${id} background"></div>
+    <div class="cell"><img src="assets/mult_ref/${id}_background_annotated.jpg" alt="${id} annotated"></div>
+    <div class="cell"><img src="assets/mult_ref/${id}_output.jpg"              alt="${id} output"></div>
+  `;
+  return wrap;
+}
+
+/** 构建第 5 页（x4）的射流 */
+(function buildMultiRefTracksX4(){
+  const rows = Array.from(document.querySelectorAll('.ticker.demo-shoot4'));
+  if(!rows.length) return;
+
+  rows.forEach(row => {
+    const track = document.createElement('div');
+    track.className = 'track';
+    row.appendChild(track);
+  });
+
+  DEMO_IDS_X4.forEach((id, i) => {
+    const row = rows[i % rows.length];
+    row.querySelector('.track').appendChild(createBundleNode4(id));
+  });
+
+  rows.forEach(row => row.dataset.mode = 'shoot');
+  rows.forEach(initShootTicker);
+})();
 
 </script>
 </body>

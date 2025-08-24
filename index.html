@@ -311,6 +311,91 @@
   background: #1e293b;  /* 比 #0f172a 稍微亮一点 */
   border: 1px solid #475569;  /* 给一点描边，增强分隔 */
 }
+
+
+/* ====== 双 Subject 5 步动画（Subject1→Subject2→Background→ROI→Output） ====== */
+.oneanim5-grid{
+  display:grid; gap:16px;
+  grid-template-columns:repeat(3, minmax(0,1fr)); align-items:start;
+}
+@media (max-width: 900px){ .oneanim5-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
+@media (max-width: 640px){ .oneanim5-grid{ grid-template-columns:1fr; } }
+
+.oneanim5-item{ display:flex; flex-direction:column; gap:8px; align-items:center; }
+
+/* 单卡样式与 .oneanim-card 一致，另起类名以免互相影响 */
+.oneanim5-card{
+  --dur:12s;
+  position:relative;
+  width:100%; max-width:320px;
+  aspect-ratio:1/1;
+  border:1px solid var(--border); border-radius:16px; overflow:hidden;
+  background:#0f172a; box-shadow:var(--shadow);
+}
+@media (max-width:1200px){ .oneanim5-card{ max-width:300px; } }
+@media (max-width:900px){  .oneanim5-card{ max-width:280px; } }
+@media (max-width:640px){  .oneanim5-card{ max-width:min(92vw,360px); } }
+
+.oneanim5-layer{
+  position:absolute; inset:0; background-size:cover; background-position:center; background-repeat:no-repeat;
+  opacity:0; will-change:opacity;
+}
+
+/* 5 层绑定：sub1 / sub2 / bg / box / out */
+.oneanim5-card .step1-sub1 { background-image:var(--sub1); animation:oa5_step1 var(--dur) ease-in-out infinite; }
+.oneanim5-card .step2-sub2 { background-image:var(--sub2); animation:oa5_step2 var(--dur) ease-in-out infinite; }
+.oneanim5-card .step3-bg   { background-image:var(--bg);   animation:oa5_step3 var(--dur) ease-in-out infinite; }
+.oneanim5-card .step4-box  { background-image:var(--bgbox);animation:oa5_step4 var(--dur) ease-in-out infinite; }
+.oneanim5-card .step5-out  { background-image:var(--out);  animation:oa5_step5 var(--dur) ease-in-out infinite; }
+
+@keyframes oa5_step1{
+  0%{opacity:1}
+  18%{opacity:1}    /* 保持到 20% */
+  23%{opacity:0}    /* 20→26 淡出(6%) */
+  100%{opacity:0}
+}
+@keyframes oa5_step2{
+  0%{opacity:0}
+  16%{opacity:0}    /* 比上一步淡出起点(20%) 早 2% 开始淡入 */
+  22%{opacity:1}    /* 完全亮起，和 step1 的 24→26 尾巴重叠 2% */
+  38%{opacity:1}    /* 保持 */
+  43%{opacity:0}    /* 44→50 淡出(6%) */
+  100%{opacity:0}
+}
+@keyframes oa5_step3{
+  0%{opacity:0}
+  36%{opacity:0}    /* 比 step2 淡出起点(44%) 早 2% 淡入 */
+  42%{opacity:1}    /* 与 step2 尾巴 48→50 重叠 2% */
+  60%{opacity:1}
+  63%{opacity:0}
+  100%{opacity:0}
+}
+@keyframes oa5_step4{
+  0%{opacity:0}
+  58%{opacity:0}    /* 比 step3 淡出起点(68%) 早 2% 淡入 */
+  62%{opacity:1}    /* 与 step3 尾巴 72→74 重叠 2% */
+  80%{opacity:1}
+  84%{opacity:0}
+  100%{opacity:0}
+}
+@keyframes oa5_step5{
+  0%{opacity:0}
+  80%{opacity:0}    /* 比 step4 淡出起点(92%) 早 2% 淡入 */
+  83%{opacity:1}    /* 与 step4 尾巴 96→98 重叠 2% */
+  100%{opacity:1}   /* 收尾保持 */
+}
+
+
+
+.oneanim5-caption{
+  margin:0; text-align:center; color:var(--muted); font-weight:600; font-size:.92rem;
+}
+.oneanim5-caption span{ transition:color .25s ease, text-shadow .25s ease; }
+.oneanim5-caption span.active{
+  color: var(--blue);
+  text-shadow: 0 0 10px rgba(96,165,250,.35);
+}
+
 </style>
 </head>
 
@@ -500,26 +585,190 @@
       </div>
     </div>
   </section>
-
+<!-- Page 4: Image Wall -->
 <section class="snap" id="multiref">
   <div class="fullbleed">
     <h2 class="section-title">Single Reference Image Wall</h2>
 
     <!-- 3 行射流，素材由 JS 自动注入 -->
-    <div class="ticker row-gap shoot demo-shoot" data-speed="220" data-gap="24"></div>
-    <div class="ticker row-gap shoot demo-shoot" data-speed="210" data-gap="24"></div>
     <div class="ticker row-gap shoot demo-shoot" data-speed="200" data-gap="24"></div>
+    <div class="ticker row-gap shoot demo-shoot" data-speed="190" data-gap="24"></div>
+    <div class="ticker row-gap shoot demo-shoot" data-speed="180" data-gap="24"></div>
   </div>
 </section>
-<!-- Page 5: Four-Image Wall -->
+
+
+<!-- Page: Double Subject Animation (x6) 三列自适应 -->
+<section class="snap" id="double-anim-grid">
+  <div class="fullbleed">
+    <h2 class="section-title">Double Subject</h2>
+    <div class="oneanim5-grid">
+
+      <!-- 卡片 1 -->
+      <div class="oneanim5-item">
+        <div class="oneanim5-card"
+          style="
+            --sub1:url('assets/mult_ref/000081_img1.jpg');
+            --sub2:url('assets/mult_ref/000081_img2.jpg');
+              --bg:url('assets/mult_ref/000081_background.jpg');
+           --bgbox:url('assets/mult_ref/000081_background_annotated.jpg');
+             --out:url('assets/mult_ref/000081_output.jpg');
+            --dur:10s;">
+          <div class="oneanim5-layer step1-sub1"></div>
+          <div class="oneanim5-layer step2-sub2"></div>
+          <div class="oneanim5-layer step3-bg"></div>
+          <div class="oneanim5-layer step4-box"></div>
+          <div class="oneanim5-layer step5-out"></div>
+        </div>
+        <div class="oneanim5-caption">
+          <span data-step="1">Sub 1</span> &nbsp;→&nbsp;
+          <span data-step="2">Sub 2</span> &nbsp;→&nbsp;
+          <span data-step="3">Background</span> &nbsp;→&nbsp;
+          <span data-step="4">ROI</span> &nbsp;→&nbsp;
+          <span data-step="5">Output</span>
+        </div>
+      </div>
+
+      <!-- 卡片 2 -->
+      <div class="oneanim5-item">
+        <div class="oneanim5-card"
+          style="
+            --sub1:url('assets/mult_ref/000098_img1.jpg');
+            --sub2:url('assets/mult_ref/000098_img2.jpg');
+              --bg:url('assets/mult_ref/000098_background.jpg');
+           --bgbox:url('assets/mult_ref/000098_background_annotated.jpg');
+             --out:url('assets/mult_ref/000098_output.jpg');
+            --dur:10s;">
+          <div class="oneanim5-layer step1-sub1"></div>
+          <div class="oneanim5-layer step2-sub2"></div>
+          <div class="oneanim5-layer step3-bg"></div>
+          <div class="oneanim5-layer step4-box"></div>
+          <div class="oneanim5-layer step5-out"></div>
+        </div>
+        <div class="oneanim5-caption">
+          <span data-step="1">Sub 1</span> &nbsp;→&nbsp;
+          <span data-step="2">Sub 2</span> &nbsp;→&nbsp;
+          <span data-step="3">Background</span> &nbsp;→&nbsp;
+          <span data-step="4">ROI</span> &nbsp;→&nbsp;
+          <span data-step="5">Output</span>
+        </div>
+      </div>
+
+      <!-- 卡片 3 -->
+      <div class="oneanim5-item">
+        <div class="oneanim5-card"
+          style="
+            --sub1:url('assets/mult_ref/000120_img1.jpg');
+            --sub2:url('assets/mult_ref/000120_img2.jpg');
+              --bg:url('assets/mult_ref/000120_background.jpg');
+           --bgbox:url('assets/mult_ref/000120_background_annotated.jpg');
+             --out:url('assets/mult_ref/000120_output.jpg');
+            --dur:10s;">
+          <div class="oneanim5-layer step1-sub1"></div>
+          <div class="oneanim5-layer step2-sub2"></div>
+          <div class="oneanim5-layer step3-bg"></div>
+          <div class="oneanim5-layer step4-box"></div>
+          <div class="oneanim5-layer step5-out"></div>
+        </div>
+        <div class="oneanim5-caption">
+          <span data-step="1">Sub 1</span> &nbsp;→&nbsp;
+          <span data-step="2">Sub 2</span> &nbsp;→&nbsp;
+          <span data-step="3">Background</span> &nbsp;→&nbsp;
+          <span data-step="4">ROI</span> &nbsp;→&nbsp;
+          <span data-step="5">Output</span>
+        </div>
+      </div>
+
+      <!-- 卡片 4 -->
+      <div class="oneanim5-item">
+        <div class="oneanim5-card"
+          style="
+            --sub1:url('assets/mult_ref/000125_img1.jpg');
+            --sub2:url('assets/mult_ref/000125_img2.jpg');
+              --bg:url('assets/mult_ref/000125_background.jpg');
+           --bgbox:url('assets/mult_ref/000125_background_annotated.jpg');
+             --out:url('assets/mult_ref/000125_output.jpg');
+            --dur:10s;">
+          <div class="oneanim5-layer step1-sub1"></div>
+          <div class="oneanim5-layer step2-sub2"></div>
+          <div class="oneanim5-layer step3-bg"></div>
+          <div class="oneanim5-layer step4-box"></div>
+          <div class="oneanim5-layer step5-out"></div>
+        </div>
+        <div class="oneanim5-caption">
+          <span data-step="1">Sub 1</span> &nbsp;→&nbsp;
+          <span data-step="2">Sub 2</span> &nbsp;→&nbsp;
+          <span data-step="3">Background</span> &nbsp;→&nbsp;
+          <span data-step="4">ROI</span> &nbsp;→&nbsp;
+          <span data-step="5">Output</span>
+        </div>
+      </div>
+
+      <!-- 卡片 5 -->
+      <div class="oneanim5-item">
+        <div class="oneanim5-card"
+          style="
+            --sub1:url('assets/mult_ref/000217_img1.jpg');
+            --sub2:url('assets/mult_ref/000217_img2.jpg');
+              --bg:url('assets/mult_ref/000217_background.jpg');
+           --bgbox:url('assets/mult_ref/000217_background_annotated.jpg');
+             --out:url('assets/mult_ref/000217_output.jpg');
+            --dur:10s;">
+          <div class="oneanim5-layer step1-sub1"></div>
+          <div class="oneanim5-layer step2-sub2"></div>
+          <div class="oneanim5-layer step3-bg"></div>
+          <div class="oneanim5-layer step4-box"></div>
+          <div class="oneanim5-layer step5-out"></div>
+        </div>
+        <div class="oneanim5-caption">
+          <span data-step="1">Sub 1</span> &nbsp;→&nbsp;
+          <span data-step="2">Sub 2</span> &nbsp;→&nbsp;
+          <span data-step="3">Background</span> &nbsp;→&nbsp;
+          <span data-step="4">ROI</span> &nbsp;→&nbsp;
+          <span data-step="5">Output</span>
+        </div>
+      </div>
+
+      <!-- 卡片 6 -->
+      <div class="oneanim5-item">
+        <div class="oneanim5-card"
+          style="
+            --sub1:url('assets/mult_ref/000171_img1.jpg');
+            --sub2:url('assets/mult_ref/000171_img2.jpg');
+              --bg:url('assets/mult_ref/000171_background.jpg');
+           --bgbox:url('assets/mult_ref/000171_background_annotated.jpg');
+             --out:url('assets/mult_ref/000171_output.jpg');
+            --dur:10s;">
+          <div class="oneanim5-layer step1-sub1"></div>
+          <div class="oneanim5-layer step2-sub2"></div>
+          <div class="oneanim5-layer step3-bg"></div>
+          <div class="oneanim5-layer step4-box"></div>
+          <div class="oneanim5-layer step5-out"></div>
+        </div>
+        <div class="oneanim5-caption">
+          <span data-step="1">Sub 1</span> &nbsp;→&nbsp;
+          <span data-step="2">Sub 2</span> &nbsp;→&nbsp;
+          <span data-step="3">Background</span> &nbsp;→&nbsp;
+          <span data-step="4">ROI</span> &nbsp;→&nbsp;
+          <span data-step="5">Output</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+
+<!-- Page 6: Four-Image Wall -->
 <section class="snap" id="multiref-x4">
   <div class="fullbleed">
     <h2 class="section-title">Multi-Reference Image Wall</h2>
 
     <!-- 3 行射流，素材由 JS 自动注入 -->
-    <div class="ticker row-gap shoot demo-shoot4" data-speed="220" data-gap="24"></div>
-    <div class="ticker row-gap shoot demo-shoot4" data-speed="210" data-gap="24"></div>
     <div class="ticker row-gap shoot demo-shoot4" data-speed="200" data-gap="24"></div>
+    <div class="ticker row-gap shoot demo-shoot4" data-speed="190" data-gap="24"></div>
+    <div class="ticker row-gap shoot demo-shoot4" data-speed="180" data-gap="24"></div>
   </div>
 </section>
 
@@ -704,17 +953,13 @@ document.addEventListener('click', (e) => {
     }
 });
 // document.querySelectorAll('.ticker[data-mode="shoot"]').forEach(initShootTicker);
-/* ===== 4) 单图位动画：文字高亮与动画同步 ===== */
+/* ===== 4) 单图位动画：文字高亮与动画同步（兼容 4/5 步） ===== */
 (function initOneAnimCaptions(){
-  // 读取 oneanim-card 的 --dur（秒）
   const getDurSec = (card)=>{
     const cs = getComputedStyle(card);
-    // 变量写在 style 里时，必须读取到具体值（秒）——这里默认 12s
     let dur = cs.getPropertyValue('--dur').trim() || '12s';
-    // 如果没取到 var(--dur)，再尝试读取动画时长（兼容性兜底）
     if(!dur || dur === '0s'){
-      // 从任意一层动画上抓一个时长
-      const layer = card.querySelector('.oneanim-layer');
+      const layer = card.querySelector('[class*="layer"]');
       if(layer){
         const a = getComputedStyle(layer).animationDuration;
         if(a && a.endsWith('s')) dur = a;
@@ -724,48 +969,47 @@ document.addEventListener('click', (e) => {
     return isNaN(n) ? 12 : n;
   };
 
-  // 自动把纯文本 caption 包装成 4 个 span（如果用户没手动写 span）
-  document.querySelectorAll('.oneanim-item .oneanim-caption').forEach(cap=>{
+  // 自动把纯文本 caption 包装为 span（支持 4 或 5 步）
+  document.querySelectorAll('.oneanim-caption, .oneanim5-caption').forEach(cap=>{
     if(!cap.querySelector('span')){
-      const txt = cap.textContent;
-      const parts = txt.split('→').map(s=>s.trim());
-      if(parts.length === 4){
-        cap.innerHTML =
-          `<span data-step="1">${parts[0]}</span> &nbsp;→&nbsp; `+
-          `<span data-step="2">${parts[1]}</span> &nbsp;→&nbsp; `+
-          `<span data-step="3">${parts[2]}</span> &nbsp;→&nbsp; `+
-          `<span data-step="4">${parts[3]}</span>`;
+      const parts = cap.textContent.split('→').map(s=>s.trim()).filter(Boolean);
+      if(parts.length === 4 || parts.length === 5){
+        cap.innerHTML = parts.map((p,i)=>`<span data-step="${i+1}">${p}</span>`).join(' &nbsp;→&nbsp; ');
       }
     }
   });
 
-  // 根据你 CSS 的四段时间线（约等分），轮流高亮 1→2→3→4
-  document.querySelectorAll('.oneanim-item').forEach(item=>{
-    const card = item.querySelector('.oneanim-card');
-    const cap  = item.querySelector('.oneanim-caption');
+  // 绑定所有 4 步卡 & 5 步卡
+  const allItems = [
+    ...document.querySelectorAll('.oneanim-item'),
+    ...document.querySelectorAll('.oneanim5-item')
+  ];
+
+  allItems.forEach(item=>{
+    const card = item.querySelector('.oneanim-card, .oneanim5-card');
+    const cap  = item.querySelector('.oneanim-caption, .oneanim5-caption');
     if(!card || !cap) return;
 
     const spans = cap.querySelectorAll('span[data-step]');
-    if(spans.length !== 4) return;
+    if(!spans.length) return;
 
-    const dur = getDurSec(card);        // 总时长（秒），默认 12
-    const stepDur = dur / 4;            // 简单等分 4 步
+    const stepCount = spans.length;             // 4 或 5
+    const dur = getDurSec(card);
+    const stepDur = dur / stepCount;
     let step = 1;
 
     const highlight = (s)=>{
       spans.forEach(el=> el.classList.toggle('active', +el.dataset.step === s));
     };
-
-    // 立即根据当前时间对齐一步（避免初始空窗）
     highlight(step);
 
-    // 循环定时器：每 stepDur 秒切到下一步
     setInterval(()=>{
-      step = (step % 4) + 1;  // 1→2→3→4→1
+      step = (step % stepCount) + 1;
       highlight(step);
     }, stepDur * 1000);
   });
 })();
+
 
 /* ===== Build demo bundles for Multi‑Reference (3 rows) ===== */
 
